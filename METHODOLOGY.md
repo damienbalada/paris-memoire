@@ -104,6 +104,7 @@ score global  +  INDICE DE CONFIANCE (séparé) = entity_coverage
 | GEO | Géopolitique & Prises de position | lobbying, Russie, financement politique |
 | TAX | Fiscalité | CbCR, juridictions à faible imposition |
 | GOV | Gouvernance | conseil, sanctions |
+| INV | Investissements & Finance éthique | finance durable, désinvestissement fossile, participations controversées |
 
 ### Méta-score « Bien-être du vivant »
 
