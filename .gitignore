@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+apps/web/build/
+
+# Production
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env*.local
+!.env.example
+
+# Supabase
+supabase/.branches/
+supabase/.temp/
+**/.supabase/
+
+# Python (pipeline)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Logs / OS / editors
+*.log
+npm-debug.log*
+.DS_Store
+.idea/
+.vscode/
+*.swp
