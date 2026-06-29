@@ -1,0 +1,22 @@
+[project]
+name = "paris-memoire-pipeline"
+version = "0.1.0"
+description = "Pipeline de collecte (Awareness Score) — résolution d'entités GLEIF/SIRENE."
+requires-python = ">=3.10"
+dependencies = [
+  "httpx>=0.27",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["paris_memoire", "paris_memoire.connectors", "paris_memoire.normalize"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
