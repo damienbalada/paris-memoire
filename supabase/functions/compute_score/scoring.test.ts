@@ -229,6 +229,63 @@ test("méta-score — agrège les dimensions membres", () => {
   assert.equal(living.grade, "C");
 });
 
+// --- Plafond d'exploitation animale (gate) -----------------------------------
+test("gate — l'exploitation animale plafonne le pilier malgré un bon welfare", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [
+      ind("ANI_LEATHER_TRACE", "ANI", { weight: 1 }),
+      ind("ANI_FUR_FREE", "ANI", { weight: 1 }),
+      ind("ANI_EXPLOITATION", "ANI", { weight: 0, kind: "categorical" }), // gate
+    ],
+    evidence: [
+      ev({ indicator_code: "ANI_LEATHER_TRACE", nature: "result", normalized_value: 1.0 }),
+      ev({ indicator_code: "ANI_FUR_FREE", nature: "result", normalized_value: 1.0 }),
+      ev({ indicator_code: "ANI_EXPLOITATION", nature: "result", normalized_value: 0.40 }), // extensive
+    ],
+    dimensionGates: [{ dimension_code: "ANI", gate_indicator_code: "ANI_EXPLOITATION", default_ceiling: 0.40 }],
+    profileWeights: [{ dimension_code: "ANI", weight: 1 }],
+  }));
+  const ani = res.dimensions.find((d) => d.dimension_code === "ANI")!;
+  // welfare moyen = 1.0, mais plafonné à 0.40
+  assert.equal(ani.score, 0.40);
+  assert.equal(ani.ceiling, 0.40);
+  assert.equal(ani.capped_by_gate, true);
+  assert.equal(ani.applicable_indicators, 2); // le gate n'est pas compté
+});
+
+test("gate — animal_free lève le plafond (note pleine possible)", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [
+      ind("ANI_LEATHER_TRACE", "ANI", { weight: 1 }),
+      ind("ANI_EXPLOITATION", "ANI", { weight: 0, kind: "categorical" }),
+    ],
+    evidence: [
+      ev({ indicator_code: "ANI_LEATHER_TRACE", nature: "result", normalized_value: 0.9 }),
+      ev({ indicator_code: "ANI_EXPLOITATION", nature: "result", normalized_value: 1.0 }), // animal_free
+    ],
+    dimensionGates: [{ dimension_code: "ANI", gate_indicator_code: "ANI_EXPLOITATION", default_ceiling: 0.40 }],
+    profileWeights: [{ dimension_code: "ANI", weight: 1 }],
+  }));
+  const ani = res.dimensions.find((d) => d.dimension_code === "ANI")!;
+  assert.equal(ani.score, 0.9);
+  assert.ok(!ani.capped_by_gate);
+});
+
+test("gate — exploitation inconnue : plafond par défaut appliqué", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [
+      ind("ANI_LEATHER_TRACE", "ANI", { weight: 1 }),
+      ind("ANI_EXPLOITATION", "ANI", { weight: 0, kind: "categorical" }),
+    ],
+    evidence: [ev({ indicator_code: "ANI_LEATHER_TRACE", nature: "result", normalized_value: 1.0 })], // gate non renseigné
+    dimensionGates: [{ dimension_code: "ANI", gate_indicator_code: "ANI_EXPLOITATION", default_ceiling: 0.40 }],
+    profileWeights: [{ dimension_code: "ANI", weight: 1 }],
+  }));
+  const ani = res.dimensions.find((d) => d.dimension_code === "ANI")!;
+  assert.equal(ani.score, 0.40); // plafond par défaut (on suppose l'exploitation)
+  assert.equal(ani.capped_by_gate, true);
+});
+
 // --- Notes lettrées ----------------------------------------------------------
 test("toGrade — seuils", () => {
   assert.equal(toGrade(0.85), "A");

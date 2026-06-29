@@ -69,6 +69,16 @@ export interface DimensionGroup {
   name: string;
   members: { dimension_code: string; weight: number }[];
 }
+/**
+ * Plafond de dimension piloté par un indicateur "gate" (ex: exploitation
+ * animale plafonne le pilier ANI). Le gate ne pèse PAS dans la moyenne :
+ * sa valeur sert de plafond. Si le gate est inconnu, default_ceiling s'applique.
+ */
+export interface DimensionGate {
+  dimension_code: string;
+  gate_indicator_code: string;
+  default_ceiling: number;
+}
 
 export interface ScoreInput {
   applicableIndicators: Indicator[];
@@ -81,6 +91,8 @@ export interface ScoreInput {
   params: ScoringParams;
   /** indicator_code -> valeurs numériques des pairs du secteur (incl. l'entité). */
   peerValues?: Record<string, number[]>;
+  /** plafonds de dimension pilotés par un indicateur gate. */
+  dimensionGates?: DimensionGate[];
 }
 
 export interface IndicatorResult {
@@ -105,6 +117,10 @@ export interface DimensionResult {
   grade: string;
   applicable_indicators: number;
   covered_indicators: number;
+  /** plafond appliqué (gate) si la dimension en a un. */
+  ceiling?: number;
+  /** true si le plafond a effectivement rabaissé la note (ex: exploitation animale). */
+  capped_by_gate?: boolean;
   indicators: IndicatorResult[];
 }
 export interface GroupResult {
@@ -295,21 +311,28 @@ export function computeScore(input: ScoreInput): ScoreResult {
   const dimScore = new Map<string, number>();
   const dimConf = new Map<string, number>();
 
+  const gateByDim = new Map((input.dimensionGates ?? []).map((g) => [g.dimension_code, g]));
   const dimsWithIndicators = [...new Set(input.applicableIndicators.map((i) => i.dimension_code))];
 
   for (const dimCode of dimsWithIndicators) {
     const inds = input.applicableIndicators.filter((i) => i.dimension_code === dimCode);
-    const totalWeight = inds.reduce((s, i) => s + i.weight, 0);
-    if (totalWeight === 0) continue;
+    const gate = gateByDim.get(dimCode);
+    const gateCode = gate?.gate_indicator_code;
+
+    // Le gate ne pèse PAS dans la moyenne : il sert de plafond.
+    const scored = inds.filter((i) => i.code !== gateCode);
+    const scoreWeight = scored.reduce((s, i) => s + i.weight, 0);
 
     let scoreNum = 0;
     let confNum = 0;
+    let confWeight = 0;
     let covered = 0;
     const indicators: IndicatorResult[] = [];
 
     for (const ind of inds) {
       const r = resByCode.get(ind.code)!;
       indicators.push(r);
+      if (ind.code === gateCode) continue; // exclu de la moyenne et des compteurs
       if (r.covered) {
         scoreNum += (r.value ?? 0) * ind.weight;
         confNum += r.confidence * ind.weight;
@@ -319,10 +342,23 @@ export function computeScore(input: ScoreInput): ScoreResult {
         scoreNum += input.params.missing_data_score * ind.weight;
         confNum += input.params.missing_data_confidence * ind.weight;
       }
+      confWeight += ind.weight;
     }
 
-    const score = clamp01(scoreNum / totalWeight);
-    const confidence = clamp01(confNum / totalWeight);
+    if (scoreWeight === 0 && !gate) continue;
+
+    const avg = scoreWeight > 0 ? scoreNum / scoreWeight : 0;
+
+    // Plafond (gate) : valeur du gate si connue, sinon default_ceiling (conservateur).
+    let ceiling = 1;
+    if (gate) {
+      const gr = resByCode.get(gateCode!);
+      ceiling = gr && gr.covered && gr.value !== null ? gr.value : gate.default_ceiling;
+    }
+    const score = clamp01(Math.min(avg, ceiling));
+    const cappedByGate = gate ? score < avg - 1e-9 : false;
+    const confidence = clamp01(confWeight > 0 ? confNum / confWeight : 0);
+
     dimScore.set(dimCode, score);
     dimConf.set(dimCode, confidence);
 
@@ -332,8 +368,10 @@ export function computeScore(input: ScoreInput): ScoreResult {
       score,
       confidence,
       grade: toGrade(score),
-      applicable_indicators: inds.length,
+      applicable_indicators: scored.length,
       covered_indicators: covered,
+      ceiling: gate ? clamp01(ceiling) : undefined,
+      capped_by_gate: cappedByGate || undefined,
       indicators,
     });
   }

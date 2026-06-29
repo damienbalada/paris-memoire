@@ -27,7 +27,8 @@ for (const [key, p] of Object.entries(data)) {
   for (const g of r.groups) console.log(`  méta « ${g.name} » : ${g.grade} (${g.score.toFixed(3)})  fiab ${(g.confidence * 100).toFixed(0)}%`);
   console.log("Dimensions :");
   for (const d of r.dimensions) {
-    console.log(`  ${d.dimension_code}  ${d.grade}  score=${d.score.toFixed(3)}  conf=${d.confidence.toFixed(2)}  (${d.covered_indicators}/${d.applicable_indicators} couverts)`);
+    const cap = d.capped_by_gate ? `  ⛔PLAFOND=${d.ceiling!.toFixed(2)}` : "";
+    console.log(`  ${d.dimension_code}  ${d.grade}  score=${d.score.toFixed(3)}  conf=${d.confidence.toFixed(2)}  (${d.covered_indicators}/${d.applicable_indicators} couverts)${cap}`);
     for (const ind of d.indicators.filter((x) => x.covered)) {
       const flags = [ind.capped_by_greenwashing ? "PLAFOND-greenwashing" : "", ind.floored_by_low_tier ? "PLANCHER-tier-bas" : ""].filter(Boolean).join(",");
       console.log(`       - ${ind.indicator_code}: ${ind.value!.toFixed(3)} [${ind.nature}/${ind.tier}] ${flags}`);

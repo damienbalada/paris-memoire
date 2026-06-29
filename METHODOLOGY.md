@@ -106,6 +106,25 @@ score global  +  INDICE DE CONFIANCE (séparé) = entity_coverage
 | GOV | Gouvernance | conseil, sanctions |
 | INV | Investissements & Finance éthique | finance durable, désinvestissement fossile, participations controversées |
 
+### Règle ANI — Plafond d'exploitation animale (gate)
+
+Principe antispéciste : **l'exploitation animale est la base**. S'il y a
+exploitation (matières animales : cuir, laine, soie, duvet, fourrure, peaux…),
+la note du pilier ANI est **plafonnée** — le bien-être ne fait que positionner
+la note *sous* ce plafond, il ne le lève pas. Seules des matières non-animales
+le lèvent.
+
+| Niveau d'exploitation (`ANI_EXPLOITATION`) | Plafond ANI | Note max |
+|---|---:|:--:|
+| `animal_free` (aucune matière animale) | 1.00 | A |
+| `limited` (animal marginal) | 0.55 | C |
+| `extensive` (cuir/laine au cœur) | 0.40 | D |
+| inconnu (défaut secteur mode) | 0.40 | D |
+
+Mécanisme générique (`dimension_gates`) : un indicateur « gate » borne le score
+d'une dimension sans entrer dans sa moyenne. Si le niveau est inconnu, on
+suppose l'exploitation (plafond 0.40) — anti-opacité.
+
 ### Méta-score « Bien-être du vivant »
 
 Philosophie : **les humains sont des animaux**. On couvre tout le vivant. Le
