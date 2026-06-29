@@ -1,0 +1,188 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { computeScore, toGrade, type DimensionResult } from "@/lib/scoring";
+import type { ProfilePreset, ScorePayload } from "@/lib/data";
+
+const gradeColor: Record<string, string> = {
+  A: "var(--a)", B: "var(--b)", C: "var(--c)", D: "var(--d)", E: "var(--e)",
+};
+const pct = (x: number) => `${Math.round(x * 100)}%`;
+
+export function CompanyScore({
+  payload,
+  presets,
+}: {
+  payload: ScorePayload;
+  presets: ProfilePreset[];
+}) {
+  // Poids éditables (init = profil par défaut renvoyé par la base).
+  const initWeights: Record<string, number> = {};
+  for (const pw of payload.profileWeights) initWeights[pw.dimension_code] = pw.weight;
+
+  const [weights, setWeights] = useState<Record<string, number>>(initWeights);
+  const [activePreset, setActivePreset] = useState<string>(payload.profile.code);
+
+  const result = useMemo(() => {
+    const profileWeights = payload.dimensions.map((d) => ({
+      dimension_code: d.code,
+      weight: weights[d.code] ?? 0,
+    }));
+    return computeScore({ ...payload, profileWeights });
+  }, [payload, weights]);
+
+  function applyPreset(p: ProfilePreset) {
+    const w: Record<string, number> = {};
+    for (const d of payload.dimensions) w[d.code] = p.weights[d.code] ?? 0;
+    setWeights(w);
+    setActivePreset(p.code);
+  }
+
+  const chain = payload.ownership_chain ?? [];
+
+  return (
+    <main>
+      <a className="muted small" href="/">← toutes les entreprises</a>
+
+      {/* En-tête : note ET fiabilité, séparées */}
+      <div className="panel" style={{ marginTop: 12 }}>
+        <div className="row between wrap">
+          <div>
+            <h1 style={{ marginBottom: 2 }}>{payload.entity.name}</h1>
+            <div className="muted small">
+              {chain.length > 1 ? chain.join("  →  ") : "Groupe"}
+            </div>
+          </div>
+          <div className="row" style={{ gap: 20 }}>
+            <div style={{ textAlign: "center" }}>
+              <div className={`grade grade-${result.grade}`}>{result.grade}</div>
+              <div className="muted small" style={{ marginTop: 4 }}>Note · {pct(result.score)}</div>
+            </div>
+            <div style={{ minWidth: 160 }}>
+              <div className="small">Fiabilité</div>
+              <div className="meter" style={{ margin: "4px 0" }}>
+                <span style={{ width: pct(result.confidence) }} />
+              </div>
+              <div className="muted small">
+                {pct(result.confidence)} {result.publishable ? "" : "· données insuffisantes"}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Méta-scores */}
+        {result.groups.length > 0 && (
+          <div className="row wrap" style={{ marginTop: 14, gap: 10 }}>
+            {result.groups.map((g) => (
+              <span key={g.code} className="badge" style={{ borderColor: gradeColor[g.grade], color: gradeColor[g.grade] }}>
+                {g.name} : {g.grade} ({pct(g.score)})
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Sliders de pondération */}
+      <div className="panel">
+        <div className="row between wrap" style={{ marginBottom: 10 }}>
+          <h3 style={{ margin: 0 }}>Vos priorités</h3>
+          <div className="row wrap" style={{ gap: 6 }}>
+            {presets.map((p) => (
+              <button
+                key={p.code}
+                className={`btn ${activePreset === p.code ? "active" : ""}`}
+                onClick={() => applyPreset(p)}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
+        </div>
+        {payload.dimensions.map((d) => (
+          <div className="slider-row" key={d.code}>
+            <span className="small">{d.name}</span>
+            <input
+              type="range" min={0} max={0.5} step={0.01}
+              value={weights[d.code] ?? 0}
+              onChange={(e) => {
+                setWeights({ ...weights, [d.code]: Number(e.target.value) });
+                setActivePreset("");
+              }}
+            />
+            <span className="muted small">{pct(weights[d.code] ?? 0)}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Détail par pilier */}
+      {result.dimensions.map((d) => (
+        <DimensionPanel key={d.dimension_code} d={d} />
+      ))}
+
+      <p className="muted small" style={{ marginTop: 20 }}>
+        Profil affiché : <strong>{activePreset ? presets.find((p) => p.code === activePreset)?.name : "personnalisé"}</strong>.
+        Méthodologie publique et versionnée.
+      </p>
+    </main>
+  );
+}
+
+function DimensionPanel({ d }: { d: DimensionResult }) {
+  const covered = d.indicators.filter((i) => i.covered);
+  return (
+    <div className="panel">
+      <div className="row between">
+        <div className="row" style={{ gap: 10 }}>
+          <div className={`grade sm grade-${d.grade}`}>{d.grade}</div>
+          <strong>{d.name}</strong>
+        </div>
+        <span className="muted small">
+          fiabilité {pct(d.confidence)} · {d.covered_indicators}/{d.applicable_indicators} indicateurs
+        </span>
+      </div>
+
+      <div className="row" style={{ margin: "10px 0 2px" }}>
+        <div className="bar">
+          <span style={{ width: pct(d.score), background: gradeColor[d.grade] }} />
+        </div>
+        <span className="small" style={{ width: 40, textAlign: "right" }}>{pct(d.score)}</span>
+      </div>
+
+      {d.capped_by_gate && (
+        <span className="badge cap">⛔ Plafonné à {pct(d.ceiling ?? 0)} — exploitation animale</span>
+      )}
+
+      {covered.length === 0 ? (
+        <p className="muted small" style={{ marginTop: 10 }}>
+          Aucune donnée publiée sur ce pilier — noté 0 (l'opacité n'est pas récompensée).
+        </p>
+      ) : (
+        <div style={{ marginTop: 8 }}>
+          {covered.map((i) => (
+            <div className="evidence" key={i.indicator_code}>
+              <div className="row between wrap" style={{ gap: 6 }}>
+                <span className="small">{i.indicator_code}</span>
+                <span className="row" style={{ gap: 6 }}>
+                  {i.capped_by_greenwashing && <span className="badge warn">engagement plafonné</span>}
+                  {i.floored_by_low_tier && <span className="badge warn">source faible</span>}
+                  <span className="badge">{i.nature}</span>
+                  <strong className="small">{pct(i.value ?? 0)}</strong>
+                </span>
+              </div>
+              <div className="muted small" style={{ marginTop: 3 }}>
+                {i.source_url ? (
+                  <a href={i.source_url} target="_blank" rel="noreferrer" style={{ textDecoration: "underline" }}>
+                    <span className={`tier-${i.tier}`}>{i.source_code}</span>
+                  </a>
+                ) : (
+                  <span className={`tier-${i.tier}`}>{i.source_code}</span>
+                )}
+                {" · "}{i.observed_on}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
