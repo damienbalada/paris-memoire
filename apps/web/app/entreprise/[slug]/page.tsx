@@ -1,4 +1,4 @@
-import { getScorePayload, getProfilePresets } from "@/lib/data";
+import { getScorePayload } from "@/lib/data";
 import { CompanyScore } from "@/components/CompanyScore";
 
 export const dynamic = "force-dynamic";
@@ -11,10 +11,7 @@ export default async function CompanyPage({
   const { slug } = await params;
 
   try {
-    const [payload, presets] = await Promise.all([
-      getScorePayload(slug),
-      getProfilePresets(),
-    ]);
+    const payload = await getScorePayload(slug);
     if (!payload) {
       return (
         <main>
@@ -23,7 +20,7 @@ export default async function CompanyPage({
         </main>
       );
     }
-    return <CompanyScore payload={payload} presets={presets} />;
+    return <CompanyScore payload={payload} />;
   } catch (e) {
     return (
       <main>

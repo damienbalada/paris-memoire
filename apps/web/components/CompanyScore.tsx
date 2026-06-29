@@ -1,43 +1,14 @@
-"use client";
-
-import { useMemo, useState } from "react";
-import { computeScore, toGrade, type DimensionResult } from "@/lib/scoring";
-import type { ProfilePreset, ScorePayload } from "@/lib/data";
+import { computeScore, type DimensionResult } from "@/lib/scoring";
+import type { ScorePayload } from "@/lib/data";
 
 const gradeColor: Record<string, string> = {
   A: "var(--a)", B: "var(--b)", C: "var(--c)", D: "var(--d)", E: "var(--e)",
 };
 const pct = (x: number) => `${Math.round(x * 100)}%`;
 
-export function CompanyScore({
-  payload,
-  presets,
-}: {
-  payload: ScorePayload;
-  presets: ProfilePreset[];
-}) {
-  // Poids éditables (init = profil par défaut renvoyé par la base).
-  const initWeights: Record<string, number> = {};
-  for (const pw of payload.profileWeights) initWeights[pw.dimension_code] = pw.weight;
-
-  const [weights, setWeights] = useState<Record<string, number>>(initWeights);
-  const [activePreset, setActivePreset] = useState<string>(payload.profile.code);
-
-  const result = useMemo(() => {
-    const profileWeights = payload.dimensions.map((d) => ({
-      dimension_code: d.code,
-      weight: weights[d.code] ?? 0,
-    }));
-    return computeScore({ ...payload, profileWeights });
-  }, [payload, weights]);
-
-  function applyPreset(p: ProfilePreset) {
-    const w: Record<string, number> = {};
-    for (const d of payload.dimensions) w[d.code] = p.weights[d.code] ?? 0;
-    setWeights(w);
-    setActivePreset(p.code);
-  }
-
+export function CompanyScore({ payload }: { payload: ScorePayload }) {
+  // Pondération fixe : profil renvoyé par la base (défaut « Équilibré »).
+  const result = computeScore(payload);
   const chain = payload.ownership_chain ?? [];
 
   return (
@@ -82,46 +53,13 @@ export function CompanyScore({
         )}
       </div>
 
-      {/* Sliders de pondération */}
-      <div className="panel">
-        <div className="row between wrap" style={{ marginBottom: 10 }}>
-          <h3 style={{ margin: 0 }}>Vos priorités</h3>
-          <div className="row wrap" style={{ gap: 6 }}>
-            {presets.map((p) => (
-              <button
-                key={p.code}
-                className={`btn ${activePreset === p.code ? "active" : ""}`}
-                onClick={() => applyPreset(p)}
-              >
-                {p.name}
-              </button>
-            ))}
-          </div>
-        </div>
-        {payload.dimensions.map((d) => (
-          <div className="slider-row" key={d.code}>
-            <span className="small">{d.name}</span>
-            <input
-              type="range" min={0} max={0.5} step={0.01}
-              value={weights[d.code] ?? 0}
-              onChange={(e) => {
-                setWeights({ ...weights, [d.code]: Number(e.target.value) });
-                setActivePreset("");
-              }}
-            />
-            <span className="muted small">{pct(weights[d.code] ?? 0)}</span>
-          </div>
-        ))}
-      </div>
-
       {/* Détail par pilier */}
       {result.dimensions.map((d) => (
         <DimensionPanel key={d.dimension_code} d={d} />
       ))}
 
       <p className="muted small" style={{ marginTop: 20 }}>
-        Profil affiché : <strong>{activePreset ? presets.find((p) => p.code === activePreset)?.name : "personnalisé"}</strong>.
-        Méthodologie publique et versionnée.
+        Pondération : <strong>{payload.profile.name}</strong>. Méthodologie publique et versionnée.
       </p>
     </main>
   );
