@@ -35,15 +35,33 @@ python -m paris_memoire.enrich_entities --limit 5   # limiter
 - La `service_role` contourne la RLS : elle est réservée à ce pipeline et ne doit
   jamais être exposée côté navigateur ni committée.
 
+## Importer de l'evidence (HATVP, liste Yale)
+
+Chaque import écrit l'evidence en statut **`pending`** : rien n'est publié sans
+revue humaine (page `/admin/revue` de l'app web). Les imports sont
+**idempotents** (index unique : relancer un import ne crée pas de doublon).
+
+```bash
+# HATVP (lobbying) — télécharger le JSON open data AGORA :
+# https://www.hatvp.fr/agora/opendata/
+python -m paris_memoire.import_hatvp --file agora_repertoire.json          # dry-run
+python -m paris_memoire.import_hatvp --file agora_repertoire.json --apply
+
+# Liste Yale (Russie) — télécharger le CSV :
+# https://www.yalerussianbusinessretreat.org/
+python -m paris_memoire.import_yale --file yale.csv                         # dry-run
+python -m paris_memoire.import_yale --file yale.csv --apply
+```
+
 ## Sources
 
-| Source | API | Auth | Donnée |
-|--------|-----|------|--------|
-| GLEIF | `api.gleif.org` | non | LEI, nom légal, pays, parent direct |
-| SIRENE | `recherche-entreprises.api.gouv.fr` | non | SIREN, raison sociale (France) |
+| Source | Donnée | Accès | Indicateurs alimentés |
+|--------|--------|-------|------------------------|
+| GLEIF (`api.gleif.org`) | LEI, nom légal, pays, parent direct | API sans clé | identifiants d'entités |
+| SIRENE (`recherche-entreprises.api.gouv.fr`) | SIREN, raison sociale (FR) | API sans clé | identifiants d'entités |
+| HATVP (open data AGORA) | inscription + dépenses de lobbying | fichier JSON à télécharger | `GEO_LOBBYING_TRANSP`, `GEO_LOBBYING_SPEND` |
+| Liste Yale CELI | position Russie (grades A..F) | CSV à télécharger | `GEO_RUSSIA_EXIT` |
 
 ## Prochaines sources (à venir)
 
-HATVP (lobbying), liste Yale (Russie), Fashion Transparency Index,
-plans de vigilance — alimenteront la table `evidence` en statut `pending`
-(revue humaine avant passage en `approved`).
+Fashion Transparency Index, plans de vigilance, Égapro, CDP/SBTi.
