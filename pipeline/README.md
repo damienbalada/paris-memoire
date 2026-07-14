@@ -56,6 +56,11 @@ python -m paris_memoire.import_yale --file yale.csv --apply
 # (lancer enrich_entities d'abord)
 python -m paris_memoire.import_egapro                                        # dry-run
 python -m paris_memoire.import_egapro --apply
+
+# SBTi (objectifs climat) — télécharger l'export CSV « Companies taking action » :
+# https://sciencebasedtargets.org/companies-taking-action
+python -m paris_memoire.import_sbti --file sbti.csv                          # dry-run
+python -m paris_memoire.import_sbti --file sbti.csv --apply
 ```
 
 ## Sources
@@ -67,7 +72,8 @@ python -m paris_memoire.import_egapro --apply
 | HATVP (open data AGORA) | inscription + dépenses de lobbying | fichier JSON à télécharger | `GEO_LOBBYING_TRANSP`, `GEO_LOBBYING_SPEND` |
 | Liste Yale CELI | position Russie (grades A..F) | CSV à télécharger | `GEO_RUSSIA_EXIT` |
 | Égapro (data.economie.gouv.fr) | index égalité F/H /100 | API sans clé (par SIREN) | `LAB_EGAPRO_INDEX` |
+| SBTi | objectifs climat (validé/engagé/retiré) | CSV à télécharger | `ENV_SBTI_VALIDATED` |
 
 ## Prochaines sources (à venir)
 
-Fashion Transparency Index, plans de vigilance, CDP/SBTi.
+Fashion Transparency Index, plans de vigilance, CDP.
