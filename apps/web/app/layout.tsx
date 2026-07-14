@@ -14,7 +14,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <div className="container">
           <header className="row between" style={{ marginBottom: 24 }}>
             <a href="/"><strong>Awareness Score</strong></a>
-            <span className="muted small">Luxe / Mode · France + UE</span>
+            <span className="row" style={{ gap: 14 }}>
+              <a className="muted small" href="/methodologie">Méthodologie</a>
+              <span className="muted small">Luxe / Mode · France + UE</span>
+            </span>
           </header>
           {children}
         </div>

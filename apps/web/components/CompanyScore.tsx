@@ -10,6 +10,10 @@ export function CompanyScore({ payload }: { payload: ScorePayload }) {
   // Pondération fixe : profil renvoyé par la base (défaut « Équilibré »).
   const result = computeScore(payload);
   const chain = payload.ownership_chain ?? [];
+  // code indicateur -> nom lisible (fourni par compute_score_input)
+  const indicatorNames = new Map(
+    payload.applicableIndicators.map((i) => [i.code, i.name ?? i.code]),
+  );
 
   return (
     <main>
@@ -55,7 +59,7 @@ export function CompanyScore({ payload }: { payload: ScorePayload }) {
 
       {/* Détail par pilier */}
       {result.dimensions.map((d) => (
-        <DimensionPanel key={d.dimension_code} d={d} />
+        <DimensionPanel key={d.dimension_code} d={d} names={indicatorNames} />
       ))}
 
       <p className="muted small" style={{ marginTop: 20 }}>
@@ -65,7 +69,7 @@ export function CompanyScore({ payload }: { payload: ScorePayload }) {
   );
 }
 
-function DimensionPanel({ d }: { d: DimensionResult }) {
+function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, string> }) {
   const covered = d.indicators.filter((i) => i.covered);
   return (
     <div className="panel">
@@ -99,7 +103,9 @@ function DimensionPanel({ d }: { d: DimensionResult }) {
           {covered.map((i) => (
             <div className="evidence" key={i.indicator_code}>
               <div className="row between wrap" style={{ gap: 6 }}>
-                <span className="small">{i.indicator_code}</span>
+                <span className="small" title={i.indicator_code}>
+                  {names.get(i.indicator_code) ?? i.indicator_code}
+                </span>
                 <span className="row" style={{ gap: 6 }}>
                   {i.capped_by_greenwashing && <span className="badge warn">engagement plafonné</span>}
                   {i.floored_by_low_tier && <span className="badge warn">source faible</span>}

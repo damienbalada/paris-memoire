@@ -39,6 +39,9 @@ export interface Dimension {
 }
 export interface Indicator {
   code: string;
+  /** nom lisible (affichage) */
+  name?: string;
+  unit?: string;
   dimension_code: string;
   kind: Kind;
   direction: Direction;

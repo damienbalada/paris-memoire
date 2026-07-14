@@ -51,6 +51,11 @@ python -m paris_memoire.import_hatvp --file agora_repertoire.json --apply
 # https://www.yalerussianbusinessretreat.org/
 python -m paris_memoire.import_yale --file yale.csv                         # dry-run
 python -m paris_memoire.import_yale --file yale.csv --apply
+
+# Égapro (index égalité F/H) — API directe, prérequis : SIREN renseignés
+# (lancer enrich_entities d'abord)
+python -m paris_memoire.import_egapro                                        # dry-run
+python -m paris_memoire.import_egapro --apply
 ```
 
 ## Sources
@@ -61,7 +66,8 @@ python -m paris_memoire.import_yale --file yale.csv --apply
 | SIRENE (`recherche-entreprises.api.gouv.fr`) | SIREN, raison sociale (FR) | API sans clé | identifiants d'entités |
 | HATVP (open data AGORA) | inscription + dépenses de lobbying | fichier JSON à télécharger | `GEO_LOBBYING_TRANSP`, `GEO_LOBBYING_SPEND` |
 | Liste Yale CELI | position Russie (grades A..F) | CSV à télécharger | `GEO_RUSSIA_EXIT` |
+| Égapro (data.economie.gouv.fr) | index égalité F/H /100 | API sans clé (par SIREN) | `LAB_EGAPRO_INDEX` |
 
 ## Prochaines sources (à venir)
 
-Fashion Transparency Index, plans de vigilance, Égapro, CDP/SBTi.
+Fashion Transparency Index, plans de vigilance, CDP/SBTi.
