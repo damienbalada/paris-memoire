@@ -1,10 +1,12 @@
-# Méthodologie — Awareness Score
+# Méthodologie — DIAMS
 
-> Score éthique d'entreprise, multi-critères, **traçable**. Chaque point de note
-> renvoie à une preuve sourcée et datée. La méthodo est publique et versionnée :
-> c'est la condition de la confiance.
+> **DIAMS** — **D**iagnostic **I**ndépendant, **A**uditable et **M**ulti-critères
+> des **S**ociétés. Score éthique d'entreprise, multi-critères, **traçable** :
+> chaque point de note renvoie à une preuve sourcée et datée. La méthodo est
+> publique et versionnée : c'est la condition de la confiance.
 
-Version : `0.1.0` — périmètre de départ : **Luxe / Mode, France + UE**.
+Version : `0.2.0` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
 
@@ -125,6 +127,14 @@ Mécanisme générique (`dimension_gates`) : un indicateur « gate » borne le s
 d'une dimension sans entrer dans sa moyenne. Si le niveau est inconnu, on
 suppose l'exploitation (plafond 0.40) — anti-opacité.
 
+**Cas d'une marque 100 % végétale (`animal_free`).** Une marque sans aucun
+intrant animal (ex : Alpro) n'exploite pas d'animaux : le postulat d'exploitation
+ne s'applique pas. Le pilier ANI n'est alors **pas plafonné** ; il est au
+contraire noté positivement sur l'indicateur « gamme sans intrant animal », car
+ne causer aucun tort à un animal est le **meilleur** résultat possible sur ce
+pilier. À l'inverse, un secteur sans enjeu animal (ex : boissons) voit le pilier
+ANI simplement **retiré** (ni noté, ni plafonné).
+
 ### Méta-score « Bien-être du vivant »
 
 Philosophie : **les humains sont des animaux**. On couvre tout le vivant. Le
@@ -141,7 +151,9 @@ non-humain (`ANI`) + travail (`LAB`) + chaîne d'appro/droits humains (`SUP`).
 - **Bien-être du vivant** — priorité aux animaux humains et non-humains.
 - **Transparence & probité** — priorité fiscalité / gouvernance / prises de position.
 
-L'utilisateur peut partir d'un profil et l'ajuster via des sliders.
+Le profil appliqué par défaut est **Équilibré**. La pondération est fixée côté
+serveur (pas de réglage libre côté visiteur, pour garder des notes comparables et
+non « bricolables »).
 
 ---
 
