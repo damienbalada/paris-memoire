@@ -116,7 +116,7 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
               <div className="muted small" style={{ marginTop: 3 }}>
                 {i.source_url ? (
                   <a href={i.source_url} target="_blank" rel="noreferrer" style={{ textDecoration: "underline" }}>
-                    <span className={`tier-${i.tier}`}>{i.source_code}</span>
+                    <span className={`tier-${i.tier}`}>{i.source_code}</span> ↗
                   </a>
                 ) : (
                   <span className={`tier-${i.tier}`}>{i.source_code}</span>

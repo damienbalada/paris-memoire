@@ -286,6 +286,21 @@ test("gate — exploitation inconnue : plafond par défaut appliqué", () => {
   assert.equal(ani.capped_by_gate, true);
 });
 
+test("animal_free — pilier ANI noté sur l'absence d'intrant animal, sans plafond (cas Alpro)", () => {
+  // Forme produite par compute_score_input pour une marque animal_free :
+  // un seul indicateur ANI (ANI_ANIMAL_FREE), AUCUN gate d'exploitation.
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("ANI_ANIMAL_FREE", "ANI", { weight: 1 })],
+    evidence: [ev({ indicator_code: "ANI_ANIMAL_FREE", nature: "result", normalized_value: 1.0, specificity: 1 })],
+    dimensionGates: [], // le gate exploitation est exclu pour les marques végétales
+    profileWeights: [{ dimension_code: "ANI", weight: 1 }],
+  }));
+  const ani = res.dimensions.find((d) => d.dimension_code === "ANI")!;
+  assert.equal(ani.score, 1.0);   // meilleur résultat possible
+  assert.equal(ani.grade, "A");
+  assert.ok(!ani.capped_by_gate); // aucun plafond
+});
+
 // --- Notes lettrées ----------------------------------------------------------
 test("toGrade — seuils", () => {
   assert.equal(toGrade(0.85), "A");

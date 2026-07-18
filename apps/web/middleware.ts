@@ -24,7 +24,7 @@ export function middleware(req: NextRequest) {
   }
   return new NextResponse("Authentification requise.", {
     status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="Awareness Score", charset="UTF-8"' },
+    headers: { "WWW-Authenticate": 'Basic realm="DIAMS", charset="UTF-8"' },
   });
 }
 

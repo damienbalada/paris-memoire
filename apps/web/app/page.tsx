@@ -32,10 +32,12 @@ export default async function HomePage() {
 
   return (
     <main>
-      <h1>Score éthique des marques</h1>
+      <h1>DIAMS — score éthique des marques</h1>
       <p className="muted">
-        Une note par dimension, un indice de fiabilité affiché à part, et chaque
-        point traçable jusqu'à sa source datée. <a href="/classement" style={{ textDecoration: "underline" }}>Voir le classement →</a>
+        <strong>D</strong>iagnostic <strong>I</strong>ndépendant, <strong>A</strong>uditable et{" "}
+        <strong>M</strong>ulti-critères des <strong>S</strong>ociétés. Une note par dimension, un indice
+        de fiabilité affiché à part, et chaque point traçable jusqu'à sa source datée.{" "}
+        <a href="/classement" style={{ textDecoration: "underline" }}>Voir le classement →</a>
       </p>
 
       {error && (
