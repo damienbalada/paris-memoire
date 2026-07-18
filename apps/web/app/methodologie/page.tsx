@@ -1,37 +1,13 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import { marked } from "marked";
+import { METHODOLOGY_MD } from "@/lib/methodology";
 
 export const dynamic = "force-dynamic";
 
-// La méthodologie publique EST le fichier versionné METHODOLOGY.md du repo :
-// une seule source de vérité, auditable via l'historique git.
-async function loadMethodology(): Promise<string | null> {
-  const candidates = [
-    path.join(process.cwd(), "..", "..", "METHODOLOGY.md"), // apps/web -> racine repo
-    path.join(process.cwd(), "METHODOLOGY.md"),
-  ];
-  for (const p of candidates) {
-    try {
-      return await fs.readFile(p, "utf-8");
-    } catch {
-      // essaie le suivant
-    }
-  }
-  return null;
-}
-
+// La méthodologie est la source versionnée METHODOLOGY.md, embarquée à la
+// compilation (cf. lib/methodology.ts) : aucune lecture de fichier au runtime,
+// donc un rendu fiable quel que soit l'environnement de déploiement.
 export default async function MethodologiePage() {
-  const md = await loadMethodology();
-  if (!md) {
-    return (
-      <main>
-        <h1>Méthodologie</h1>
-        <div className="panel">METHODOLOGY.md introuvable dans ce déploiement.</div>
-      </main>
-    );
-  }
-  const html = await marked.parse(md);
+  const html = await marked.parse(METHODOLOGY_MD);
   return (
     <main>
       {/* contenu de notre propre repo, versionné — pas de contenu externe */}
