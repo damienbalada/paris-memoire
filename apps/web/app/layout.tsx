@@ -15,8 +15,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <header className="row between" style={{ marginBottom: 24 }}>
             <a href="/"><strong>Awareness Score</strong></a>
             <span className="row" style={{ gap: 14 }}>
+              <a className="muted small" href="/classement">Classement</a>
               <a className="muted small" href="/methodologie">Méthodologie</a>
-              <span className="muted small">Luxe / Mode · France + UE</span>
             </span>
           </header>
           {children}
