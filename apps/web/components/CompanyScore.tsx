@@ -6,6 +6,12 @@ const gradeColor: Record<string, string> = {
 };
 const pct = (x: number) => `${Math.round(x * 100)}%`;
 
+// Raison du plafond d'un pilier (gate), par dimension.
+const capReason: Record<string, string> = {
+  ANI: "exploitation animale",
+  PLA: "pollueur plastique majeur",
+};
+
 export function CompanyScore({ payload }: { payload: ScorePayload }) {
   // Pondération fixe : profil renvoyé par la base (défaut « Équilibré »).
   const result = computeScore(payload);
@@ -91,7 +97,7 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
       </div>
 
       {d.capped_by_gate && (
-        <span className="badge cap">⛔ Plafonné à {pct(d.ceiling ?? 0)} — exploitation animale</span>
+        <span className="badge cap">⛔ Plafonné à {pct(d.ceiling ?? 0)} — {capReason[d.dimension_code] ?? "cause structurelle"}</span>
       )}
 
       {covered.length === 0 ? (

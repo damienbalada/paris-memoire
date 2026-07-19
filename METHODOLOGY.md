@@ -100,7 +100,8 @@ score global  +  INDICE DE CONFIANCE (séparé) = entity_coverage
 | Code | Dimension | Note |
 |------|-----------|------|
 | ENV | Environnement | climat, émissions, matières |
-| WAP | Eau & Plastique | pollution plastique (Break Free From Plastic), emballages, stress hydrique (CDP Water) — *pertinent selon le secteur* |
+| PLA | Plastique | pollution plastique (Break Free From Plastic), emballages recyclés, réduction du plastique vierge — *pertinent selon le secteur* |
+| WAT | Eau | note CDP Water, intensité de prélèvement, stress hydrique et controverses — *pertinent selon le secteur* |
 | LAB | Travail & Rémunération | bien-être des **animaux humains**, en interne |
 | SUP | Chaîne d'appro & Droits humains | bien-être des **animaux humains**, en amont |
 | ANI | Bien-être animal (non-humain) | élevage, cuirs, laine, duvet, fourrure, tests, abattage |
@@ -135,6 +136,16 @@ contraire noté positivement sur l'indicateur « gamme sans intrant animal », c
 ne causer aucun tort à un animal est le **meilleur** résultat possible sur ce
 pilier. À l'inverse, un secteur sans enjeu animal (ex : boissons) voit le pilier
 ANI simplement **retiré** (ni noté, ni plafonné).
+
+### Règle PLA — Plafond « gros pollueur plastique »
+
+Symétrique de la règle animale : un indicateur *gate* (`PLA_POLLUTER`, alimenté
+par les audits *Break Free From Plastic*) **plafonne** la note du pilier
+Plastique selon la gravité du classement — un pollueur mondial majeur ne peut pas
+obtenir une bonne note plastique, même avec de beaux engagements (la preuve prime
+sur la promesse). Contrairement à l'animal, l'absence de classement **ne
+présume pas** le pire (plafond par défaut 1.0) : seules les marques explicitement
+classées sont plafonnées.
 
 ### Méta-score « Bien-être du vivant »
 
