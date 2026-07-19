@@ -77,3 +77,22 @@ export async function listEntities() {
   if (error) throw new Error(error.message);
   return data ?? [];
 }
+
+/**
+ * Remonte la chaîne de propriété jusqu'au groupe racine (le vrai bénéficiaire
+ * économique). Renvoie null si l'entité est elle-même la racine.
+ */
+export async function getOwnerGroup(slug: string): Promise<{ slug: string; name: string } | null> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("entities")
+    .select("id, slug, display_name, legal_name, parent_id");
+  if (error || !data) return null;
+  const byId = new Map<string, any>(data.map((e: any) => [e.id, e]));
+  const bySlug = new Map<string, any>(data.map((e: any) => [e.slug, e]));
+  let cur = bySlug.get(slug);
+  if (!cur) return null;
+  while (cur.parent_id && byId.get(cur.parent_id)) cur = byId.get(cur.parent_id);
+  if (!cur || cur.slug === slug) return null; // l'entité est déjà la racine
+  return { slug: cur.slug, name: cur.display_name ?? cur.legal_name };
+}

@@ -1,4 +1,4 @@
-import { computeScore, type DimensionResult } from "@/lib/scoring";
+import { computeScore, type DimensionResult, type ScoreResult } from "@/lib/scoring";
 import type { ScorePayload } from "@/lib/data";
 
 const gradeColor: Record<string, string> = {
@@ -12,10 +12,34 @@ const capReason: Record<string, string> = {
   PLA: "pollueur plastique majeur",
 };
 
-export function CompanyScore({ payload }: { payload: ScorePayload }) {
+export function CompanyScore({
+  payload,
+  group = null,
+}: {
+  payload: ScorePayload;
+  group?: { name: string; result: ScoreResult } | null;
+}) {
   // Pondération fixe : profil renvoyé par la base (défaut « Équilibré »).
   const result = computeScore(payload);
   const chain = payload.ownership_chain ?? [];
+
+  // Comparaison marque ↔ groupe propriétaire : on repère les piliers qui
+  // divergent nettement (≥ 20 points). Les piliers où la marque fait bien mieux
+  // que son groupe (≥ 30 points) déclenchent une alerte « circuit de l'argent ».
+  const groupDims = new Map((group?.result.dimensions ?? []).map((d) => [d.dimension_code, d]));
+  const divergences = group
+    ? result.dimensions
+        .map((d) => ({ d, g: groupDims.get(d.dimension_code) }))
+        .filter((x) => x.g && Math.abs(x.d.score - x.g!.score) >= 0.2)
+        .map((x) => ({
+          code: x.d.dimension_code,
+          name: x.d.name,
+          markGrade: x.d.grade,
+          groupGrade: x.g!.grade,
+          diff: x.d.score - x.g!.score,
+        }))
+    : [];
+  const betterThanGroup = divergences.filter((x) => x.diff >= 0.3);
   // code indicateur -> nom lisible (fourni par compute_score_input)
   const indicatorNames = new Map(
     payload.applicableIndicators.map((i) => [i.code, i.name ?? i.code]),
@@ -62,6 +86,46 @@ export function CompanyScore({ payload }: { payload: ScorePayload }) {
           </div>
         )}
       </div>
+
+      {/* Encart marque ↔ groupe propriétaire */}
+      {group && (
+        <div className="panel" style={{ borderColor: "#3a4256" }}>
+          <div className="row between wrap" style={{ gap: 8 }}>
+            <div>
+              <strong>🏭 Groupe propriétaire : {group.name}</strong>
+              <div className="muted small">À qui va l'argent quand vous achetez cette marque.</div>
+            </div>
+            <span className="badge" style={{ borderColor: gradeColor[group.result.grade], color: gradeColor[group.result.grade] }}>
+              Note du groupe : {group.result.grade} ({pct(group.result.score)})
+            </span>
+          </div>
+
+          {divergences.length > 0 && (
+            <div style={{ marginTop: 12 }}>
+              <div className="muted small" style={{ marginBottom: 4 }}>Écarts marque ↔ groupe :</div>
+              {divergences.map((x) => (
+                <div className="row between" key={x.code} style={{ padding: "5px 0", borderTop: "1px solid var(--border)" }}>
+                  <span className="small">{x.name}</span>
+                  <span className="row" style={{ gap: 6 }}>
+                    <span className={`grade sm grade-${x.markGrade}`} style={{ width: 22, height: 22, fontSize: 11, borderRadius: 6 }}>{x.markGrade}</span>
+                    <span className="muted small">marque</span>
+                    <span className="muted">→</span>
+                    <span className={`grade sm grade-${x.groupGrade}`} style={{ width: 22, height: 22, fontSize: 11, borderRadius: 6 }}>{x.groupGrade}</span>
+                    <span className="muted small">groupe</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {betterThanGroup.length > 0 && (
+            <span className="badge warn" style={{ marginTop: 12, display: "inline-block", whiteSpace: "normal", lineHeight: 1.4 }}>
+              ⚠️ Cette marque est nettement mieux notée que son groupe sur : {betterThanGroup.map((x) => x.name).join(", ")}.
+              Votre achat bénéficie tout de même au groupe {group.name}.
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Détail par pilier */}
       {result.dimensions.map((d) => (
