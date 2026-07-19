@@ -100,6 +100,7 @@ score global  +  INDICE DE CONFIANCE (séparé) = entity_coverage
 | Code | Dimension | Note |
 |------|-----------|------|
 | ENV | Environnement | climat, émissions, matières |
+| WAP | Eau & Plastique | pollution plastique (Break Free From Plastic), emballages, stress hydrique (CDP Water) — *pertinent selon le secteur* |
 | LAB | Travail & Rémunération | bien-être des **animaux humains**, en interne |
 | SUP | Chaîne d'appro & Droits humains | bien-être des **animaux humains**, en amont |
 | ANI | Bien-être animal (non-humain) | élevage, cuirs, laine, duvet, fourrure, tests, abattage |
