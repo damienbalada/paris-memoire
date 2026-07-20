@@ -14,15 +14,21 @@ const pillarName: Record<string, string> = {
 
 // Parts pour/contre/abstention (en % de la barre) à partir d'une position.
 // Le sens est porté par la DIRECTION de la barre, jamais par une couleur morale.
-function shares(stance: string, nFor: number | null, nAgainst: number | null) {
-  if (nFor !== null && nAgainst !== null && nFor + nAgainst > 0) {
-    const t = nFor + nAgainst;
-    return { pour: (nFor / t) * 100, contre: (nAgainst / t) * 100, label: `${nFor}/${t}` };
+function shares(stance: string, nFor: number | null, nAgainst: number | null, nAbstain: number | null) {
+  if (nFor !== null && nAgainst !== null) {
+    const ab = nAbstain ?? 0;
+    const t = nFor + nAgainst + ab;
+    if (t > 0) {
+      return {
+        pour: (nFor / t) * 100, contre: (nAgainst / t) * 100, abstain: (ab / t) * 100,
+        label: ab > 0 ? `${nFor}/${nAgainst}/${ab}` : `${nFor}/${nAgainst}`,
+      };
+    }
   }
-  if (stance === "for") return { pour: 100, contre: 0, label: "pour" };
-  if (stance === "against") return { pour: 0, contre: 100, label: "contre" };
-  if (stance === "abstain") return { pour: 0, contre: 0, label: "abstention" };
-  return { pour: 50, contre: 50, label: "partagé" }; // split sans décompte -> indicatif
+  if (stance === "for") return { pour: 100, contre: 0, abstain: 0, label: "pour" };
+  if (stance === "against") return { pour: 0, contre: 100, abstain: 0, label: "contre" };
+  if (stance === "abstain") return { pour: 0, contre: 0, abstain: 100, label: "abstention" };
+  return { pour: 50, contre: 50, abstain: 0, label: "partagé" }; // split sans décompte -> indicatif
 }
 
 // Une ligne = un groupe (ou l'ensemble). Barre divergente : contre à gauche,
@@ -81,13 +87,14 @@ function VoteCard({ v, groups }: { v: CivicVote; groups: CivicGroup[] }) {
         {groups.map((g) => {
           const p = posByGroup.get(g.code);
           if (!p) return null;
-          const s = shares(p.stance, p.n_for, p.n_against);
+          const s = shares(p.stance, p.n_for, p.n_against, p.n_abstain);
           return (
             <DivergingRow
               key={g.code}
               label={g.short_name}
               pour={s.pour}
               contre={s.contre}
+              abstain={s.abstain}
               num={s.label}
               title={`${g.name}${p.note ? " — " + p.note : ""}`}
             />
@@ -121,12 +128,25 @@ export default async function CivicPage() {
     );
   }
 
+  const chamberName: Record<string, string> = {
+    EP: "🇪🇺 Parlement européen",
+    AN: "🇫🇷 Assemblée nationale",
+  };
   const byPillar = new Map<string, CivicVote[]>();
   for (const v of data.votes) {
     const arr = byPillar.get(v.pillar_code) ?? [];
     arr.push(v);
     byPillar.set(v.pillar_code, arr);
   }
+  const byChamber = (votes: CivicVote[]) => {
+    const m = new Map<string, CivicVote[]>();
+    for (const v of votes) {
+      const arr = m.get(v.chamber) ?? [];
+      arr.push(v);
+      m.set(v.chamber, arr);
+    }
+    return [...m.entries()];
+  };
 
   return (
     <main>
@@ -148,8 +168,15 @@ export default async function CivicPage() {
       {[...byPillar.entries()].map(([pillar, votes]) => (
         <section key={pillar} style={{ marginTop: 18 }}>
           <h2 style={{ fontSize: 18, marginBottom: 8 }}>{pillarName[pillar] ?? pillar}</h2>
-          {votes.map((v) => (
-            <VoteCard key={v.code} v={v} groups={data!.groups} />
+          {byChamber(votes).map(([chamber, cvotes]) => (
+            <div key={chamber} style={{ marginBottom: 8 }}>
+              <div className="muted small" style={{ margin: "6px 2px 8px", fontWeight: 600 }}>
+                {chamberName[chamber] ?? chamber}
+              </div>
+              {cvotes.map((v) => (
+                <VoteCard key={v.code} v={v} groups={data!.groups} />
+              ))}
+            </div>
           ))}
         </section>
       ))}
