@@ -12,27 +12,46 @@ const pillarName: Record<string, string> = {
   INV: "💰 Finance",
 };
 
-// Couleur factuelle du sens du vote — pas un jugement, juste pour / contre.
-const stanceStyle: Record<string, { bg: string; label: string }> = {
-  for:     { bg: "var(--a)", label: "pour" },
-  against: { bg: "var(--e)", label: "contre" },
-  split:   { bg: "var(--c)", label: "divisé" },
-  abstain: { bg: "var(--border)", label: "abstention" },
-};
+// Parts pour/contre/abstention (en % de la barre) à partir d'une position.
+// Le sens est porté par la DIRECTION de la barre, jamais par une couleur morale.
+function shares(stance: string, nFor: number | null, nAgainst: number | null) {
+  if (nFor !== null && nAgainst !== null && nFor + nAgainst > 0) {
+    const t = nFor + nAgainst;
+    return { pour: (nFor / t) * 100, contre: (nAgainst / t) * 100, label: `${nFor}/${t}` };
+  }
+  if (stance === "for") return { pour: 100, contre: 0, label: "pour" };
+  if (stance === "against") return { pour: 0, contre: 100, label: "contre" };
+  if (stance === "abstain") return { pour: 0, contre: 0, label: "abstention" };
+  return { pour: 50, contre: 50, label: "partagé" }; // split sans décompte -> indicatif
+}
 
-function Bar({ f, a, ab }: { f: number; a: number; ab: number }) {
-  const t = Math.max(1, f + a + ab);
+// Une ligne = un groupe (ou l'ensemble). Barre divergente : contre à gauche,
+// pour à droite, abstention = bloc neutre centré sur le zéro.
+function DivergingRow({
+  label, pour, contre, abstain = 0, num, title, summary = false,
+}: {
+  label: string; pour: number; contre: number; abstain?: number;
+  num: string; title?: string; summary?: boolean;
+}) {
   return (
-    <div className="row" style={{ height: 8, borderRadius: 5, overflow: "hidden", width: "100%", background: "var(--border)" }}>
-      <span style={{ width: `${(f / t) * 100}%`, background: "var(--a)" }} />
-      <span style={{ width: `${(ab / t) * 100}%`, background: "var(--c)" }} />
-      <span style={{ width: `${(a / t) * 100}%`, background: "var(--e)" }} />
+    <div className={`civ-row${summary ? " sum" : ""}`} title={title}>
+      <span className="civ-label">{label}</span>
+      <div className="civ-track">
+        <div className="civ-side l"><span className="civ-bar contre" style={{ width: `${contre}%` }} /></div>
+        <div className="civ-side r"><span className="civ-bar pour" style={{ width: `${pour}%` }} /></div>
+        {abstain > 0 && <span className="civ-abst" style={{ width: `${abstain}%` }} />}
+      </div>
+      <span className="civ-num">{num}</span>
     </div>
   );
 }
 
 function VoteCard({ v, groups }: { v: CivicVote; groups: CivicGroup[] }) {
   const posByGroup = new Map(v.positions.map((p) => [p.group_code, p]));
+  const tf = v.total_for ?? 0, ta = v.total_against ?? 0, tab = v.total_abstain ?? 0;
+  const decisive = Math.max(1, tf + ta);
+  const total = Math.max(1, tf + ta + tab);
+
   return (
     <div className="panel">
       <div className="row between wrap" style={{ gap: 8 }}>
@@ -45,37 +64,42 @@ function VoteCard({ v, groups }: { v: CivicVote; groups: CivicGroup[] }) {
         </a>
       </div>
 
-      {v.total_for !== null && (
-        <div style={{ margin: "10px 0 4px" }}>
-          <Bar f={v.total_for} a={v.total_against ?? 0} ab={v.total_abstain ?? 0} />
-          <div className="muted small" style={{ marginTop: 4 }}>
-            <span style={{ color: "var(--a)" }}>{v.total_for} pour</span>
-            {" · "}
-            <span style={{ color: "var(--e)" }}>{v.total_against} contre</span>
-            {" · "}{v.total_abstain} abstentions
-          </div>
-        </div>
-      )}
+      {v.alignment_note && <p className="muted small" style={{ marginTop: 8 }}>{v.alignment_note}</p>}
 
-      {v.alignment_note && <p className="muted small" style={{ marginTop: 6 }}>{v.alignment_note}</p>}
-
-      <div className="row wrap" style={{ gap: 6, marginTop: 10 }}>
+      <div className="civ-chart">
+        {v.total_for !== null && (
+          <DivergingRow
+            summary
+            label="Ensemble"
+            pour={(tf / decisive) * 100}
+            contre={(ta / decisive) * 100}
+            abstain={(tab / total) * 100}
+            num={`${tf} · ${ta} · ${tab}`}
+            title={`Résultat : ${tf} pour, ${ta} contre, ${tab} abstentions`}
+          />
+        )}
         {groups.map((g) => {
           const p = posByGroup.get(g.code);
           if (!p) return null;
-          const st = stanceStyle[p.stance];
+          const s = shares(p.stance, p.n_for, p.n_against);
           return (
-            <span
+            <DivergingRow
               key={g.code}
-              title={`${g.name} — ${st.label}${p.note ? " · " + p.note : ""}`}
-              className="badge"
-              style={{ borderColor: st.bg, color: st.bg }}
-            >
-              {g.short_name} · {st.label}
-              {p.n_for !== null && p.stance === "split" ? ` (${p.n_for} pour)` : ""}
-            </span>
+              label={g.short_name}
+              pour={s.pour}
+              contre={s.contre}
+              num={s.label}
+              title={`${g.name}${p.note ? " — " + p.note : ""}`}
+            />
           );
         })}
+      </div>
+
+      <div className="civ-legend">
+        <span><span className="civ-sw pour" /> a voté pour</span>
+        <span><span className="civ-sw contre" /> a voté contre</span>
+        <span><span className="civ-sw abst" /> abstention (neutre)</span>
+        <span className="muted">← contre · pour →</span>
       </div>
     </div>
   );

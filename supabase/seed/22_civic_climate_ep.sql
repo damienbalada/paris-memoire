@@ -40,18 +40,18 @@ insert into civic_votes (code, title, vote_date, pillar_code, chamber, source_ur
 on conflict (code) do nothing;
 
 -- Positions par groupe — Restauration de la nature (2024).
-insert into civic_positions (vote_id, group_id, stance, n_for, note)
-select v.id, g.id, x.stance, x.n_for, x.note
+insert into civic_positions (vote_id, group_id, stance, n_for, n_against, note)
+select v.id, g.id, x.stance, x.n_for, x.n_against, x.note
 from (values
-  ('GUE','for',    null::int, 'Soutien du groupe.'),
-  ('GREENS','for', null,      'Soutien du groupe.'),
-  ('SD','for',     null,      'Soutien du groupe.'),
-  ('RENEW','for',  null,      'Majoritairement pour (quelques défections).'),
-  ('EPP','split',  25,        'Groupe divisé : 25 élus pour sur ~177, majorité contre.'),
-  ('ECR','against',null,      'Opposition du groupe.'),
-  ('ID','against', null,      'Opposition du groupe.'),
-  ('NI','split',   null,      'Position partagée.')
-) as x(gcode, stance, n_for, note)
+  ('GUE','for',    null::int, null::int, 'Soutien du groupe.'),
+  ('GREENS','for', null,      null,      'Soutien du groupe.'),
+  ('SD','for',     null,      null,      'Soutien du groupe.'),
+  ('RENEW','for',  null,      null,      'Majoritairement pour (quelques défections).'),
+  ('EPP','split',  25,        152,       'Groupe divisé : 25 élus pour sur 177, majorité contre.'),
+  ('ECR','against',null,      null,      'Opposition du groupe.'),
+  ('ID','against', null,      null,      'Opposition du groupe.'),
+  ('NI','split',   null,      null,      'Position partagée.')
+) as x(gcode, stance, n_for, n_against, note)
 join civic_votes v on v.code='EP_NATURE_RESTORATION_2024'
 join political_groups g on g.code=x.gcode
 on conflict (vote_id, group_id) do nothing;

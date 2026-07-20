@@ -85,6 +85,7 @@ export interface CivicPosition {
   group_code: string;
   stance: "for" | "against" | "split" | "abstain";
   n_for: number | null;
+  n_against: number | null;
   note: string | null;
 }
 export interface CivicVote {
@@ -107,7 +108,7 @@ export async function getCivicData(): Promise<{ groups: CivicGroup[]; votes: Civ
   const [{ data: groups }, { data: votes }, { data: positions }] = await Promise.all([
     supabase.from("political_groups").select("code, short_name, name, ordinal").order("ordinal"),
     supabase.from("civic_votes").select("id, code, title, vote_date, pillar_code, chamber, source_url, alignment_note, total_for, total_against, total_abstain").order("vote_date", { ascending: false }),
-    supabase.from("civic_positions").select("vote_id, group_id, stance, n_for, note"),
+    supabase.from("civic_positions").select("vote_id, group_id, stance, n_for, n_against, note"),
   ]);
   // On relie les positions aux groupes via une requête légère id -> code.
   const { data: groupIds } = await supabase.from("political_groups").select("id, code");
@@ -122,6 +123,7 @@ export async function getCivicData(): Promise<{ groups: CivicGroup[]; votes: Civ
       group_code: codeById.get((p as any).group_id) ?? "",
       stance: (p as any).stance,
       n_for: (p as any).n_for ?? null,
+      n_against: (p as any).n_against ?? null,
       note: (p as any).note ?? null,
     });
     posByVote.set(v.code, arr);
