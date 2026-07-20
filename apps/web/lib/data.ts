@@ -78,6 +78,66 @@ export async function listEntities() {
   return data ?? [];
 }
 
+// --- Module civique : cartographie des votes des groupes politiques ----------
+
+export interface CivicGroup { code: string; short_name: string; name: string; ordinal: number }
+export interface CivicPosition {
+  group_code: string;
+  stance: "for" | "against" | "split" | "abstain";
+  n_for: number | null;
+  note: string | null;
+}
+export interface CivicVote {
+  code: string;
+  title: string;
+  vote_date: string;
+  pillar_code: string;
+  chamber: string;
+  source_url: string;
+  alignment_note: string | null;
+  total_for: number | null;
+  total_against: number | null;
+  total_abstain: number | null;
+  positions: CivicPosition[];
+}
+
+/** Votes civiques (groupes politiques) + positions, groupés par vote. */
+export async function getCivicData(): Promise<{ groups: CivicGroup[]; votes: CivicVote[] }> {
+  const supabase = getSupabase();
+  const [{ data: groups }, { data: votes }, { data: positions }] = await Promise.all([
+    supabase.from("political_groups").select("code, short_name, name, ordinal").order("ordinal"),
+    supabase.from("civic_votes").select("id, code, title, vote_date, pillar_code, chamber, source_url, alignment_note, total_for, total_against, total_abstain").order("vote_date", { ascending: false }),
+    supabase.from("civic_positions").select("vote_id, group_id, stance, n_for, note"),
+  ]);
+  // On relie les positions aux groupes via une requête légère id -> code.
+  const { data: groupIds } = await supabase.from("political_groups").select("id, code");
+  const codeById = new Map((groupIds ?? []).map((g: any) => [g.id, g.code]));
+  const voteById = new Map((votes ?? []).map((v: any) => [v.id, v]));
+  const posByVote = new Map<string, CivicPosition[]>();
+  for (const p of positions ?? []) {
+    const v = voteById.get((p as any).vote_id);
+    if (!v) continue;
+    const arr = posByVote.get(v.code) ?? [];
+    arr.push({
+      group_code: codeById.get((p as any).group_id) ?? "",
+      stance: (p as any).stance,
+      n_for: (p as any).n_for ?? null,
+      note: (p as any).note ?? null,
+    });
+    posByVote.set(v.code, arr);
+  }
+  const outVotes: CivicVote[] = (votes ?? []).map((v: any) => ({
+    code: v.code, title: v.title, vote_date: v.vote_date, pillar_code: v.pillar_code,
+    chamber: v.chamber, source_url: v.source_url, alignment_note: v.alignment_note,
+    total_for: v.total_for, total_against: v.total_against, total_abstain: v.total_abstain,
+    positions: posByVote.get(v.code) ?? [],
+  }));
+  const outGroups: CivicGroup[] = (groups ?? []).map((g: any) => ({
+    code: g.code, short_name: g.short_name, name: g.name, ordinal: g.ordinal,
+  }));
+  return { groups: outGroups, votes: outVotes };
+}
+
 /**
  * Remonte la chaîne de propriété jusqu'au groupe racine (le vrai bénéficiaire
  * économique). Renvoie null si l'entité est elle-même la racine.

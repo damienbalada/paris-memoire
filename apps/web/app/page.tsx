@@ -38,6 +38,8 @@ export default async function HomePage() {
         <strong>M</strong>ulti-critères des <strong>S</strong>ociétés. Une note par dimension, un indice
         de fiabilité affiché à part, et chaque point traçable jusqu'à sa source datée.{" "}
         <a href="/classement" style={{ textDecoration: "underline" }}>Voir le classement →</a>
+        {" · "}
+        <a href="/civique" style={{ textDecoration: "underline" }}>DIAMS Civique (votes des partis) →</a>
       </p>
 
       {error && (
