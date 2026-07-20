@@ -13,20 +13,24 @@
 --  2) Rapport de la Rapporteuse spéciale ONU (A/HRC/59/23, 2025) — document
 --     officiel ONU mais d'UNE experte mandatée, périmètre plus large et plus
 --     CONTESTÉ. Les entités de notre base qui y sont citées sont insérées en
---     nature='controversy', review_status='pending' (n'affectent PAS le score
---     tant qu'un humain ne les valide pas dans /admin/revue), source attribuée.
+--     nature='controversy'. Elles sont APPROUVÉES (donc AFFICHÉES sur la fiche,
+--     par transparence) mais le moteur les EXCLUT du calcul de la note :
+--     Règle 4 (corroboration) — une controverse à source unique non
+--     réglementaire est « display_only » tant qu'elle n'est pas corroborée par
+--     ≥ 2 sources ou une décision de justice. Cf. METHODOLOGY.md §2 Règle 4.
 -- =============================================================================
 
 insert into sources (code, name, tier, url) values
   ('UN_SR_OPT','ONU — Rapporteuse spéciale TPO (A/HRC/59/23)','audited_ngo','https://www.un.org/unispal/document/a-hrc-59-23-from-economy-of-occupation-to-economy-of-genocide-report-special-rapporteur-francesca-albanese-palestine-2025/')
 on conflict (code) do nothing;
 
--- Faits cités par la Rapporteuse spéciale (en attente de revue humaine).
+-- Faits cités par la Rapporteuse spéciale : approuvés (affichés) mais exclus du
+-- calcul par la Règle 4 (source unique non corroborée -> display_only).
 insert into evidence
   (entity_id, indicator_id, source_id, value_type, value_text, normalized_value,
    nature, observed_on, confidence, review_status, reviewer, source_url, excerpt)
 select e.id, i.id, s.id, 'category'::value_type, v.vtext, v.nv,
-       'controversy'::evidence_nature, '2025-07-01'::date, v.conf, 'pending'::review_status, 'curation-v1',
+       'controversy'::evidence_nature, '2025-07-01'::date, v.conf, 'approved'::review_status, 'curation-v1',
        'https://www.un.org/unispal/document/a-hrc-59-23-from-economy-of-occupation-to-economy-of-genocide-report-special-rapporteur-francesca-albanese-palestine-2025/',
        v.ex
 from (values

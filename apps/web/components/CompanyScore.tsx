@@ -179,8 +179,13 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                 <span className="row" style={{ gap: 6 }}>
                   {i.capped_by_greenwashing && <span className="badge warn">engagement plafonné</span>}
                   {i.floored_by_low_tier && <span className="badge warn">source faible</span>}
+                  {i.unscored_controversy && <span className="badge warn" title="Source unique non corroborée : signalée mais exclue du calcul de la note.">controverse · hors note</span>}
                   <span className="badge">{i.nature}</span>
-                  <strong className="small">{pct(i.value ?? 0)}</strong>
+                  {i.display_only ? (
+                    <span className="muted small">—</span>
+                  ) : (
+                    <strong className="small">{pct(i.value ?? 0)}</strong>
+                  )}
                 </span>
               </div>
               <div className="muted small" style={{ marginTop: 3 }}>

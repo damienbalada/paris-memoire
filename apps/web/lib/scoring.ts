@@ -59,6 +59,8 @@ export interface Evidence {
   observed_on: string; // ISO date
   /** 0 = ancêtre lointain (groupe), plus élevé = plus proche de l'entité notée. */
   specificity: number;
+  /** Source explicitement contestée (ex : rapport isolé, mandat-holder controversé). */
+  contested?: boolean;
   source_code?: string;
   source_url?: string;
   excerpt?: string;
@@ -111,6 +113,10 @@ export interface IndicatorResult {
   source_url?: string;
   capped_by_greenwashing?: boolean;
   floored_by_low_tier?: boolean;
+  /** Controverse affichée mais EXCLUE du calcul (source unique non corroborée). */
+  display_only?: boolean;
+  /** Une controverse existe mais n'a pas été comptée faute de corroboration. */
+  unscored_controversy?: boolean;
 }
 export interface DimensionResult {
   dimension_code: string;
@@ -216,6 +222,42 @@ function evaluateIndicator(
     };
   }
 
+  const sortRecent = (a: Evidence, b: Evidence) =>
+    b.specificity - a.specificity || b.observed_on.localeCompare(a.observed_on);
+
+  // Corroboration (Règle 4) : une controverse issue d'une source explicitement
+  // CONTESTÉE ne PÈSE sur la note que si elle est corroborée — adjudiquée
+  // (source regulatory : justice/régulateur) OU recoupée par ≥ 2 sources
+  // distinctes. Une controverse NON contestée (ONG auditée, presse recoupée…)
+  // compte normalement. On ne laisse jamais une source unique contestée piloter
+  // un score, mais on ne neutralise pas les controverses sérieuses.
+  const distinctSources = new Set(
+    controversies.map((c) => c.source_code ?? `${c.tier}:${c.observed_on}`),
+  );
+  const corroborated =
+    controversies.some((c) => c.tier === "regulatory") || distinctSources.size >= 2;
+  const allContested = controversies.length > 0 && controversies.every((c) => c.contested === true);
+  const controversyCounts = controversies.length > 0 && (!allContested || corroborated);
+
+  // Cas : uniquement des controverses non corroborées → affiché, hors calcul.
+  if (positives.length === 0 && !controversyCounts) {
+    const driver = [...controversies].sort(sortRecent)[0];
+    return {
+      indicator_code: ind.code,
+      dimension_code: ind.dimension_code,
+      covered: true,
+      display_only: true,
+      unscored_controversy: true,
+      value: null,
+      confidence: clamp01(Math.min(driver.confidence, cfg.tierConfig[driver.tier].max_confidence)),
+      nature: "controversy",
+      tier: driver.tier,
+      observed_on: driver.observed_on,
+      source_code: driver.source_code,
+      source_url: driver.source_url,
+    };
+  }
+
   // Meilleure evidence positive : résultat > politique > engagement, puis
   // spécificité (la marque prime sur le groupe), puis récence.
   const sortBest = (a: Evidence, b: Evidence) =>
@@ -242,9 +284,10 @@ function evaluateIndicator(
     }
   }
 
-  // Controverses — pénalité, avec plancher anti-presse (règle 2)
+  // Controverses — pénalité, avec plancher anti-presse (règle 2).
+  // N'agit QUE si la controverse est corroborée (cf. controversyCounts).
   let flooredByLowTier = false;
-  if (controversies.length > 0) {
+  if (controversies.length > 0 && controversyCounts) {
     const preValue = value;
     let effPenalty = 0;
     for (const c of controversies) {
@@ -268,9 +311,7 @@ function evaluateIndicator(
   value = clamp01(value);
 
   // Confiance de l'indicateur : plafonnée par le tier (règle 2)
-  const driver = best ?? [...controversies].sort(
-    (a, b) => b.specificity - a.specificity || b.observed_on.localeCompare(a.observed_on),
-  )[0];
+  const driver = best ?? [...controversies].sort(sortRecent)[0];
   const confidence = clamp01(
     Math.min(driver.confidence, cfg.tierConfig[driver.tier].max_confidence),
   );
@@ -288,6 +329,8 @@ function evaluateIndicator(
     source_url: driver.source_url,
     capped_by_greenwashing: cappedByGreenwashing || undefined,
     floored_by_low_tier: flooredByLowTier || undefined,
+    // controverse présente mais non comptée (source unique non corroborée)
+    unscored_controversy: (controversies.length > 0 && !controversyCounts) || undefined,
   };
 }
 
@@ -322,8 +365,11 @@ export function computeScore(input: ScoreInput): ScoreResult {
     const gate = gateByDim.get(dimCode);
     const gateCode = gate?.gate_indicator_code;
 
-    // Le gate ne pèse PAS dans la moyenne : il sert de plafond.
-    const scored = inds.filter((i) => i.code !== gateCode);
+    // Le gate ne pèse PAS dans la moyenne (il sert de plafond), et une
+    // controverse non corroborée « display_only » est affichée mais hors calcul.
+    const scored = inds.filter(
+      (i) => i.code !== gateCode && !resByCode.get(i.code)?.display_only,
+    );
     const scoreWeight = scored.reduce((s, i) => s + i.weight, 0);
 
     let scoreNum = 0;
@@ -336,6 +382,7 @@ export function computeScore(input: ScoreInput): ScoreResult {
       const r = resByCode.get(ind.code)!;
       indicators.push(r);
       if (ind.code === gateCode) continue; // exclu de la moyenne et des compteurs
+      if (r.display_only) continue;        // affiché mais hors calcul (controverse non corroborée)
       if (r.covered) {
         scoreNum += (r.value ?? 0) * ind.weight;
         confNum += r.confidence * ind.weight;

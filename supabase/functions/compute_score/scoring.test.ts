@@ -129,17 +129,98 @@ test("règle 2 — la confiance d'une source presse est plafonnée à 0.45", () 
   assert.equal(res.dimensions[0].indicators[0].confidence, 0.45);
 });
 
-test("règle 2 — une controverse presse seule ne peut pas descendre sous le plancher 0.3", () => {
+test("règle 2 — deux controverses presse corroborantes : pénalise mais plancher 0.3", () => {
   const res = computeScore(baseInput({
     applicableIndicators: [ind("ANI_A", "ANI")],
-    // pas de positive -> base 0.5 ; controverse presse sévérité max
-    evidence: [ev({ indicator_code: "ANI_A", tier: "press", nature: "controversy", normalized_value: 1.0 })],
+    // pas de positive -> base 0.5 ; DEUX sources presse distinctes -> corroboré -> compte
+    evidence: [
+      ev({ indicator_code: "ANI_A", tier: "press", nature: "controversy", normalized_value: 1.0, source_code: "PRESS_A" }),
+      ev({ indicator_code: "ANI_A", tier: "press", nature: "controversy", normalized_value: 1.0, source_code: "PRESS_B" }),
+    ],
     profileWeights: [{ dimension_code: "ANI", weight: 1 }],
   }));
   const r = res.dimensions[0].indicators[0];
   // 0.5 * (1 - 1.0*0.35) = 0.325, plancher 0.3 respecté
   assert.ok(r.value! >= 0.3, `value=${r.value}`);
   assert.ok(Math.abs(r.value! - 0.325) < 1e-9);
+});
+
+// --- Règle 4 : controverse CONTESTÉE à source unique = affichée, hors calcul --
+test("règle 4 — une controverse contestée à source unique est affichée mais hors calcul", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("GEO_A", "ENV"), ind("GEO_B", "ENV")],
+    evidence: [
+      ev({ indicator_code: "GEO_A", nature: "result", normalized_value: 1.0 }),
+      // controverse contestée, source unique : ne doit PAS peser
+      ev({ indicator_code: "GEO_B", tier: "audited_ngo", nature: "controversy", normalized_value: 1.0, contested: true, source_code: "SR_ONU" }),
+    ],
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  const env = res.dimensions.find((d) => d.dimension_code === "ENV")!;
+  const rb = env.indicators.find((i) => i.indicator_code === "GEO_B")!;
+  assert.equal(rb.display_only, true);
+  assert.equal(rb.value, null);
+  assert.equal(rb.covered, true);          // toujours affiché
+  // GEO_B est exclu du calcul -> la dimension ne retient que GEO_A (=1.0)
+  assert.equal(env.score, 1.0);
+  assert.equal(env.applicable_indicators, 1);
+});
+
+test("règle 4 — une controverse NON contestée (ONG auditée) à source unique compte normalement", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("PLA_A", "ENV")],
+    // controverse crédible non contestée (ex: audit BFFP), source unique -> compte
+    evidence: [
+      ev({ indicator_code: "PLA_A", tier: "audited_ngo", nature: "controversy", normalized_value: 1.0, source_code: "BFFP" }),
+    ],
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  const r = res.dimensions[0].indicators[0];
+  assert.ok(!r.display_only);
+  // base 0.5 * (1 - 1.0*0.8) = 0.1
+  assert.ok(Math.abs(r.value! - 0.1) < 1e-9, `value=${r.value}`);
+});
+
+test("règle 4 — une controverse contestée corroborée par une 2e source compte", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("GEO_B", "ENV")],
+    evidence: [
+      ev({ indicator_code: "GEO_B", tier: "audited_ngo", nature: "controversy", normalized_value: 1.0, contested: true, source_code: "SR_ONU" }),
+      ev({ indicator_code: "GEO_B", tier: "audited_ngo", nature: "controversy", normalized_value: 1.0, contested: true, source_code: "OHCHR" }),
+    ],
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  const rb = res.dimensions[0].indicators[0];
+  assert.ok(!rb.display_only);
+  assert.ok(rb.value! < 0.5); // pénalisée
+});
+
+test("règle 4 — une controverse regulatory seule (adjudiquée) pénalise même si contestée", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("GEO_B", "ENV")],
+    evidence: [
+      ev({ indicator_code: "GEO_B", tier: "regulatory", nature: "controversy", normalized_value: 1.0, contested: true, source_code: "CIJ" }),
+    ],
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  const rb = res.dimensions[0].indicators[0];
+  // base 0.5 * (1 - 1.0*1.0) = 0
+  assert.ok(!rb.display_only);
+  assert.equal(rb.value, 0);
+});
+
+test("règle 4 — résultat + controverse contestée non corroborée : le résultat compte, controverse signalée", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("GEO_A", "ENV")],
+    evidence: [
+      ev({ indicator_code: "GEO_A", nature: "result", normalized_value: 0.9 }),
+      ev({ indicator_code: "GEO_A", tier: "audited_ngo", nature: "controversy", normalized_value: 1.0, contested: true, source_code: "SR_ONU" }),
+    ],
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  const r = res.dimensions[0].indicators[0];
+  assert.equal(r.value, 0.9);                  // non pénalisé
+  assert.equal(r.unscored_controversy, true);  // mais la controverse est signalée
 });
 
 test("règle 2 — une controverse régulatoire peut pénaliser fortement (pas de plancher)", () => {

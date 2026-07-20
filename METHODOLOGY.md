@@ -76,6 +76,27 @@ La `nature` de l'evidence module sa valeur et plafonne l'indicateur :
 **Une promesse rapporte peu, une preuve rapporte plein.** Tant qu'aucune
 evidence `result` ne confirme, l'indicateur est plafonné.
 
+### Règle 4 — Corroboration des controverses (anti-parti-pris)
+
+Une controverse **n'affecte la note que si elle est corroborée**. Sinon elle
+est **affichée** (transparence) mais **exclue du calcul** (`display_only`) :
+
+| Situation de la controverse | Effet sur la note |
+|---|---|
+| Source `regulatory` (justice / régulateur : décision, sanction) | ✅ pénalise (fait adjudiqué) |
+| Corroborée par **≥ 2 sources distinctes** | ✅ pénalise |
+| **Source unique** non réglementaire (une ONG, un rapport isolé, une allégation presse) | 🟡 affichée « hors note », n'affecte pas le score |
+
+On ne laisse **jamais une source unique contestée piloter un score**. Le fait
+reste visible sur la fiche, sourcé et daté, mais il ne devient scorant que s'il
+est confirmé par une décision officielle ou recoupé par une autre source. Cela
+protège le label du reproche de parti pris tout en préservant la transparence.
+
+> Exemple : les entreprises citées par le seul rapport d'une Rapporteuse
+> spéciale de l'ONU (source contestée, non recoupée par la base « consensus »
+> OHCHR) sont **affichées mais non comptées** tant qu'aucune source consensus
+> ou décision de justice ne corrobore.
+
 ---
 
 ## 3. Du fait au score (pipeline de calcul)
