@@ -34,6 +34,11 @@ export function CompanyScore({
   const result = computeScore(payload);
   const chain = payload.ownership_chain ?? [];
 
+  // La marque a-t-elle des preuves PROPRES ? L'evidence de l'entité notée porte
+  // la spécificité maximale (chain.length - 1) ; en dessous, c'est de l'héritage.
+  const ownSpec = Math.max(0, chain.length - 1);
+  const hasOwnEvidence = (payload.evidence ?? []).some((e) => e.specificity >= ownSpec);
+
   // Comparaison marque ↔ groupe propriétaire : on repère les piliers qui
   // divergent nettement (≥ 20 points). Les piliers où la marque fait bien mieux
   // que son groupe (≥ 30 points) déclenchent une alerte « circuit de l'argent ».
@@ -120,6 +125,13 @@ export function CompanyScore({
               Note du groupe : {group.result.grade} ({pct(group.result.score)})
             </span>
           </div>
+
+          {!hasOwnEvidence && (
+            <div className="muted small" style={{ marginTop: 10 }}>
+              Aucune donnée propre à la marque : sa note <strong>reflète entièrement celle du groupe {group.name}</strong>.
+              La transparence et les engagements sont pilotés au niveau du groupe.
+            </div>
+          )}
 
           {divergences.length > 0 && (
             <div style={{ marginTop: 12 }}>
