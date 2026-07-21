@@ -6,6 +6,11 @@ const gradeColor: Record<string, string> = {
   A: "var(--a)", B: "var(--b)", C: "var(--c)", D: "var(--d)", E: "var(--e)",
 };
 const pct = (x: number) => `${Math.round(x * 100)}%`;
+const frYearMonth = (iso: string | null) => {
+  if (!iso) return "—";
+  const [y, m] = iso.split("-");
+  return `${m}/${y}`;
+};
 
 function Table({ rows, ranked = true }: { rows: EntityScore[]; ranked?: boolean }) {
   return (
@@ -18,6 +23,7 @@ function Table({ rows, ranked = true }: { rows: EntityScore[]; ranked?: boolean 
             <th style={{ textAlign: "center", padding: "6px 4px" }}>Note</th>
             <th style={{ textAlign: "right", padding: "6px 4px" }}>Score</th>
             <th style={{ textAlign: "right", padding: "6px 4px" }}>Fiabilité</th>
+            <th style={{ textAlign: "right", padding: "6px 4px" }}>Mis à jour</th>
           </tr>
         </thead>
         <tbody>
@@ -37,6 +43,7 @@ function Table({ rows, ranked = true }: { rows: EntityScore[]; ranked?: boolean 
               </td>
               <td style={{ textAlign: "right", padding: "8px 4px" }} className={ranked ? "" : "muted"}>{pct(r.score)}</td>
               <td className="muted" style={{ textAlign: "right", padding: "8px 4px" }}>{pct(r.confidence)}</td>
+              <td className="muted small" style={{ textAlign: "right", padding: "8px 4px" }}>{frYearMonth(r.last_observed)}</td>
             </tr>
           ))}
         </tbody>

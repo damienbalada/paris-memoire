@@ -382,6 +382,28 @@ test("animal_free — pilier ANI noté sur l'absence d'intrant animal, sans plaf
   assert.ok(!ani.capped_by_gate); // aucun plafond
 });
 
+// --- Fraîcheur (dernière observation) ----------------------------------------
+test("fraîcheur — last_observed = date d'observation la plus récente", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("ENV_A", "ENV"), ind("ANI_A", "ANI")],
+    evidence: [
+      ev({ indicator_code: "ENV_A", nature: "result", normalized_value: 0.8, observed_on: "2022-05-01" }),
+      ev({ indicator_code: "ANI_A", nature: "result", normalized_value: 0.6, observed_on: "2024-09-15" }),
+    ],
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }, { dimension_code: "ANI", weight: 1 }],
+  }));
+  assert.equal(res.last_observed, "2024-09-15");
+});
+
+test("fraîcheur — aucune preuve : last_observed null", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("ENV_A", "ENV")],
+    evidence: [],
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  assert.equal(res.last_observed, null);
+});
+
 // --- Notes lettrées ----------------------------------------------------------
 test("toGrade — seuils", () => {
   assert.equal(toGrade(0.85), "A");

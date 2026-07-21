@@ -31,6 +31,7 @@ export interface EntityScore {
   score: number;
   confidence: number;
   publishable: boolean;
+  last_observed: string | null;
 }
 
 async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (t: T) => Promise<R>): Promise<R[]> {
@@ -60,6 +61,7 @@ export async function getAllScores(): Promise<EntityScore[]> {
         score: r.score,
         confidence: r.confidence,
         publishable: r.publishable,
+        last_observed: r.last_observed,
       } as EntityScore;
     } catch {
       return null;

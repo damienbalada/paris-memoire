@@ -146,6 +146,8 @@ export interface ScoreResult {
   publishable: boolean;
   dimensions: DimensionResult[];
   groups: GroupResult[];
+  /** Date d'observation la plus récente parmi les preuves retenues (fraîcheur). */
+  last_observed: string | null;
 }
 
 // --- helpers ----------------------------------------------------------------
@@ -439,6 +441,14 @@ export function computeScore(input: ScoreInput): ScoreResult {
   const score = pwTotal > 0 ? clamp01(gScoreNum / pwTotal) : 0;
   const confidence = pwTotal > 0 ? clamp01(gConfNum / pwTotal) : 0;
 
+  // Fraîcheur : date d'observation la plus récente parmi les preuves retenues.
+  let last_observed: string | null = null;
+  for (const ev of input.evidence) {
+    if (ev.observed_on && (last_observed === null || ev.observed_on > last_observed)) {
+      last_observed = ev.observed_on;
+    }
+  }
+
   // Méta-scores (groupes de dimensions)
   const groups: GroupResult[] = [];
   for (const g of input.dimensionGroups) {
@@ -469,5 +479,6 @@ export function computeScore(input: ScoreInput): ScoreResult {
     publishable: confidence >= input.params.min_confidence_to_publish,
     dimensions: dimResults.sort((a, b) => a.dimension_code.localeCompare(b.dimension_code)),
     groups,
+    last_observed,
   };
 }

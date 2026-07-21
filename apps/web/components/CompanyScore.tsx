@@ -6,6 +6,17 @@ const gradeColor: Record<string, string> = {
 };
 const pct = (x: number) => `${Math.round(x * 100)}%`;
 
+// Date ISO -> "JJ/MM/AAAA" (affichage FR).
+const frDate = (iso?: string | null) => {
+  if (!iso) return null;
+  const [y, m, d] = iso.split("-");
+  return d ? `${d}/${m}/${y}` : `${m}/${y}`;
+};
+// Une preuve est "ancienne" au-delà de 3 ans (décote totale à 5 ans).
+const STALE_BEFORE = new Date(Date.now() - 3 * 365 * 24 * 3600 * 1000)
+  .toISOString()
+  .slice(0, 10);
+
 // Raison du plafond d'un pilier (gate), par dimension.
 const capReason: Record<string, string> = {
   ANI: "exploitation animale",
@@ -57,6 +68,11 @@ export function CompanyScore({
             <div className="muted small">
               {chain.length > 1 ? chain.join("  →  ") : "Groupe"}
             </div>
+            {result.last_observed && (
+              <div className="muted small" style={{ marginTop: 2 }}>
+                Dernière mise à jour · {frDate(result.last_observed)}
+              </div>
+            )}
           </div>
           <div className="row" style={{ gap: 20 }}>
             <div style={{ textAlign: "center" }}>
@@ -196,7 +212,10 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
                 ) : (
                   <span className={`tier-${i.tier}`}>{i.source_code}</span>
                 )}
-                {" · "}{i.observed_on}
+                {" · "}{frDate(i.observed_on) ?? i.observed_on}
+                {i.observed_on && i.observed_on < STALE_BEFORE && (
+                  <span className="badge warn" style={{ marginLeft: 6 }} title="Preuve de plus de 3 ans — à rafraîchir (décote totale à 5 ans).">donnée ancienne</span>
+                )}
               </div>
             </div>
           ))}
