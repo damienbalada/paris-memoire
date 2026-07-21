@@ -56,6 +56,11 @@ export function CompanyScore({
     payload.applicableIndicators.map((i) => [i.code, i.name ?? i.code]),
   );
 
+  // Piliers NON PERTINENTS pour ce secteur (aucun indicateur applicable) :
+  // à distinguer d'un pilier applicable mais sans donnée (lui, noté 0).
+  const applicableDims = new Set(payload.applicableIndicators.map((i) => i.dimension_code));
+  const notApplicable = (payload.dimensions ?? []).filter((d) => !applicableDims.has(d.code));
+
   return (
     <main>
       <a className="muted small" href="/">← toutes les entreprises</a>
@@ -147,6 +152,16 @@ export function CompanyScore({
       {result.dimensions.map((d) => (
         <DimensionPanel key={d.dimension_code} d={d} names={indicatorNames} />
       ))}
+
+      {/* Piliers non pertinents pour le secteur (exclus du calcul, pas pénalisés) */}
+      {notApplicable.length > 0 && (
+        <div className="panel" style={{ borderStyle: "dashed" }}>
+          <div className="muted small">
+            <strong>Non applicable à ce secteur</strong> — exclu du calcul (ni bonus, ni malus) :{" "}
+            {notApplicable.map((d) => d.name).join(", ")}.
+          </div>
+        </div>
+      )}
 
       <p className="muted small" style={{ marginTop: 20 }}>
         Pondération : <strong>{payload.profile.name}</strong>. Méthodologie publique et versionnée.
