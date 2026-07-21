@@ -1,5 +1,5 @@
 // ⚠️ Généré automatiquement depuis METHODOLOGY.md (racine du dépôt).
-// Ne pas éditer à la main : régénérer via le script de build.
+// Ne pas éditer à la main : régénérer via `node scripts/gen-methodology.mjs`.
 export const METHODOLOGY_MD = `# Méthodologie — DIAMS
 
 > **DIAMS** — **D**iagnostic **I**ndépendant, **A**uditable et **M**ulti-critères
@@ -7,7 +7,7 @@ export const METHODOLOGY_MD = `# Méthodologie — DIAMS
 > chaque point de note renvoie à une preuve sourcée et datée. La méthodo est
 > publique et versionnée : c'est la condition de la confiance.
 
-Version : \`0.2.0\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : \`0.3.0\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
@@ -18,8 +18,11 @@ tech, automobile, restauration, énergie, banque** (France + international).
    Bottega → Kering, Dior → LVMH. Sans table marque → filiale → groupe avec les
    % de détention, le score est faux dès le départ. C'est le socle.
 2. **Chaque point de score = une evidence sourcée et datée.** Jamais une opinion.
-3. **Décroissance à 5 ans.** Un fait de 2014 ne plombe pas une entreprise à vie :
-   une evidence n'est « active » que pendant 5 ans après sa date d'observation.
+3. **Décroissance à 5 ans + fraîcheur affichée.** Un fait de 2014 ne plombe pas
+   une entreprise à vie : une evidence n'est « active » que pendant 5 ans après
+   sa date d'observation. La fiche affiche la **dernière mise à jour** de
+   l'entité, et toute preuve de **plus de 3 ans** porte un badge « donnée
+   ancienne » (rappel qu'elle expirera à 5 ans).
 4. **Faits séparés des jugements.** On stocke des indicateurs factuels
    normalisés ; la pondération est appliquée *après*, via des profils de valeurs
    configurables. Pas de score « one-size-fits-all ».
@@ -34,7 +37,7 @@ tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
 
-## 2. Les trois règles de calcul (tranchées, gravées en base)
+## 2. Les règles de calcul (tranchées, gravées en base)
 
 Ces règles sont stockées **en base** (\`source_tier_config\`,
 \`evidence_nature_config\`, \`scoring_params\`) pour être datées, auditables et
@@ -99,6 +102,14 @@ protège le label du reproche de parti pris tout en préservant la transparence.
 > OHCHR) sont **affichées mais non comptées** tant qu'aucune source consensus
 > ou décision de justice ne corrobore.
 
+### Règle 5 — Seuil de publication (classement)
+
+Une entité dont la **fiabilité est sous le seuil** (\`min_confidence_to_publish\`,
+30 %) n'est **pas classée** : elle apparaît dans une section « données
+insuffisantes », sans note ni rang. On ne veut pas qu'une note basse *faute de
+preuves* soit lue comme un mauvais résultat. Note, fiabilité et fraîcheur sont
+les **trois axes de confiance** affichés séparément.
+
 ---
 
 ## 3. Du fait au score (pipeline de calcul)
@@ -128,10 +139,27 @@ score global  +  INDICE DE CONFIANCE (séparé) = entity_coverage
 | LAB | Travail & Rémunération | bien-être des **animaux humains**, en interne |
 | SUP | Chaîne d'appro & Droits humains | bien-être des **animaux humains**, en amont |
 | ANI | Bien-être animal (non-humain) | élevage, cuirs, laine, duvet, fourrure, tests, abattage |
-| GEO | Géopolitique & Prises de position | lobbying, Russie, financement politique |
+| GEO | Géopolitique & Prises de position | conflits/occupations (ONU, CIJ), position Russie (Yale), lobbying (registre UE, OpenSecrets), financement politique |
 | TAX | Fiscalité | CbCR, juridictions à faible imposition |
 | GOV | Gouvernance | conseil, sanctions |
-| INV | Investissements & Finance éthique | finance durable, désinvestissement fossile, participations controversées |
+| INV | Investissements & Finance éthique | finance durable, désinvestissement fossile, participations controversées — *pertinent selon le secteur* |
+
+### Pertinence sectorielle (non-applicabilité ≠ absence de donnée)
+
+Tous les piliers ne s'appliquent pas à tous les secteurs. Trois états distincts,
+affichés clairement sur la fiche :
+
+- ✅ **noté** — des preuves existent, le pilier compte.
+- ⬜ **aucune donnée** — pilier applicable mais rien de publié → **noté 0**
+  (règle 1, l'opacité n'est pas récompensée).
+- ➖ **non applicable au secteur** — pilier **exclu** du calcul (ni bonus, ni
+  malus).
+
+Exemples : **Plastique** (emballages grand public) ne s'applique pas à
+l'automobile ; **Eau** industrielle s'applique à l'auto et l'énergie ; **Bien-être
+animal** est retiré pour la banque ou les boissons ; **Investissements** ne
+concerne que banque/assurance. La pertinence est pilotée par des drapeaux de
+secteur (\`animal_relevant\`, \`plastic_relevant\`, \`water_relevant\`, \`inv_relevant\`).
 
 ### Règle ANI — Plafond d'exploitation animale (gate)
 
@@ -201,6 +229,6 @@ Voir \`supabase/seed/03_sources.sql\` pour le registre complet. Règle d'or :
 
 ## 7. Statut
 
-Document vivant. Toute modification des paramètres de calcul (tables de config)
-doit être datée et justifiée ici.
+Document vivant (v\`0.3.0\`, juillet 2026). Toute modification des paramètres de
+calcul (tables de config) doit être datée et justifiée ici.
 `;
