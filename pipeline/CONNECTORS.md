@@ -5,6 +5,24 @@
 > modèle**, coût indépendant du nombre de marques. Tout est écrit en `pending` —
 > revue humaine obligatoire avant qu'une preuve compte dans un score.
 
+## Synthèse — quel CSV pour quel connecteur
+
+| Pilier | Commande | Colonne(s) clé du CSV | Indicateur(s) |
+|---|---|---|---|
+| ENV / WAT | `import_cdp --file cdp.csv` | `cdp_climate`, `cdp_water` (A..D-/F) | `ENV_CDP_CLIMATE`, `WAT_CDP` |
+| ENV | `import_sbti --file sbti.csv` | `Company Name`, `Target Status` | `ENV_SBTI_VALIDATED` |
+| PLA | `import_bffp --file bffp.csv` | `rank` ou `band` | `PLA_POLLUTER` (gate) |
+| LAB | `import_egapro [--file egapro.csv]` | `siren`, `note` (ou API) | `LAB_EGAPRO_INDEX` |
+| ANI / SUP | `import_benchmarks --benchmark {bbfaw\|knowthechain\|fti} --file …` | `tier` ou `score` | `ANI_BBFAW_TIER`, `SUP_KNOWTHECHAIN`, `SUP_FTI_SCORE` |
+| GEO | `import_hatvp --file agora.json` | JSON AGORA | `GEO_LOBBYING_*` |
+| GEO | `import_yale --file yale.csv` | grade A..F | `GEO_RUSSIA_EXIT` |
+| TAX | `import_tax --file tax.csv` | `cbcr_published`, `effective_tax_rate`, `haven_entities` | `TAX_*` |
+| GOV | `import_governance --file gov.csv` | `women_share`, `independent_share` | `GOV_BOARD_*` |
+| INV | `import_investments --file inv.csv` | `responsible_policy`, `fossil_financing`, … | `INV_*` |
+
+(Toutes les commandes : `python -m paris_memoire.<commande>` ; ajouter `--apply` pour écrire.)
+Détail de chaque connecteur ci-dessous.
+
 ## Invariants (tous connecteurs)
 
 - **Rapprochement conservateur** (`normalize.names.is_strong_match`) : en cas de

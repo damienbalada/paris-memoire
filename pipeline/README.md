@@ -1,7 +1,11 @@
-# Pipeline de collecte — Awareness Score
+# Pipeline de collecte — DIAMS
 
 Collecte et normalisation des données, avec revue humaine avant publication.
-Premier module livré : **résolution d'entités** (LEI via GLEIF, SIREN via SIRENE).
+Socle : **résolution d'entités** (LEI via GLEIF, SIREN via SIRENE) ; puis un
+connecteur déterministe par pilier de score.
+
+👉 **Liste complète des connecteurs, formats CSV et commandes : [`CONNECTORS.md`](./CONNECTORS.md)**
+(source de vérité). Ce README couvre l'installation et la résolution d'entités.
 
 ## Installation
 
@@ -35,45 +39,18 @@ python -m paris_memoire.enrich_entities --limit 5   # limiter
 - La `service_role` contourne la RLS : elle est réservée à ce pipeline et ne doit
   jamais être exposée côté navigateur ni committée.
 
-## Importer de l'evidence (HATVP, liste Yale)
+## Importer de l'evidence
 
 Chaque import écrit l'evidence en statut **`pending`** : rien n'est publié sans
 revue humaine (page `/admin/revue` de l'app web). Les imports sont
-**idempotents** (index unique : relancer un import ne crée pas de doublon).
+**idempotents** (index unique : relancer un import ne crée pas de doublon) et en
+**dry-run** par défaut (`--apply` pour écrire).
+
+La liste complète des connecteurs (un par pilier), les colonnes CSV attendues et
+les commandes exactes sont dans **[`CONNECTORS.md`](./CONNECTORS.md)**. Exemple :
 
 ```bash
-# HATVP (lobbying) — télécharger le JSON open data AGORA :
-# https://www.hatvp.fr/agora/opendata/
-python -m paris_memoire.import_hatvp --file agora_repertoire.json          # dry-run
-python -m paris_memoire.import_hatvp --file agora_repertoire.json --apply
-
-# Liste Yale (Russie) — télécharger le CSV :
-# https://www.yalerussianbusinessretreat.org/
-python -m paris_memoire.import_yale --file yale.csv                         # dry-run
-python -m paris_memoire.import_yale --file yale.csv --apply
-
-# Égapro (index égalité F/H) — API directe, prérequis : SIREN renseignés
-# (lancer enrich_entities d'abord)
-python -m paris_memoire.import_egapro                                        # dry-run
-python -m paris_memoire.import_egapro --apply
-
-# SBTi (objectifs climat) — télécharger l'export CSV « Companies taking action » :
-# https://sciencebasedtargets.org/companies-taking-action
-python -m paris_memoire.import_sbti --file sbti.csv                          # dry-run
-python -m paris_memoire.import_sbti --file sbti.csv --apply
+# SBTi (objectifs climat) — export « Companies taking action » :
+python -m paris_memoire.import_sbti --file sbti.csv            # dry-run
+python -m paris_memoire.import_sbti --file sbti.csv --apply    # écrit (pending)
 ```
-
-## Sources
-
-| Source | Donnée | Accès | Indicateurs alimentés |
-|--------|--------|-------|------------------------|
-| GLEIF (`api.gleif.org`) | LEI, nom légal, pays, parent direct | API sans clé | identifiants d'entités |
-| SIRENE (`recherche-entreprises.api.gouv.fr`) | SIREN, raison sociale (FR) | API sans clé | identifiants d'entités |
-| HATVP (open data AGORA) | inscription + dépenses de lobbying | fichier JSON à télécharger | `GEO_LOBBYING_TRANSP`, `GEO_LOBBYING_SPEND` |
-| Liste Yale CELI | position Russie (grades A..F) | CSV à télécharger | `GEO_RUSSIA_EXIT` |
-| Égapro (data.economie.gouv.fr) | index égalité F/H /100 | API sans clé (par SIREN) | `LAB_EGAPRO_INDEX` |
-| SBTi | objectifs climat (validé/engagé/retiré) | CSV à télécharger | `ENV_SBTI_VALIDATED` |
-
-## Prochaines sources (à venir)
-
-Fashion Transparency Index, plans de vigilance, CDP.
