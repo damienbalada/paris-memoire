@@ -91,6 +91,26 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
   background-image: repeating-linear-gradient(135deg, transparent 0 3px, rgba(0,0,0,.5) 3px 5px); }
 .civ-sw.abst { background: var(--civ-abstain); border: 1px solid var(--border); box-sizing: border-box; }
 
+/* --- Adaptations mobile ---------------------------------------------------- */
+@media (max-width: 560px) {
+  .container { padding: 16px 14px 64px; }
+  h1 { font-size: 23px; }
+  h2 { font-size: 20px; }
+  .row { gap: 10px; }
+  /* Nav : laisser les liens passer à la ligne plutôt que déborder */
+  header.row { flex-wrap: wrap; row-gap: 8px; }
+  .panel { padding: 14px; border-radius: 12px; }
+  .grade { width: 46px; height: 46px; font-size: 21px; border-radius: 10px; }
+  /* Réglages : label plus court pour laisser respirer le curseur */
+  .slider-row { grid-template-columns: 104px 1fr 38px; gap: 8px; }
+  /* Tableaux (méthodo, pipeline) : défilement horizontal au lieu de déborder */
+  .prose table { display: block; max-width: 100%; overflow-x: auto; white-space: nowrap; }
+  /* Graphe civique : colonnes latérales resserrées */
+  .civ-row { grid-template-columns: 58px 1fr 46px; gap: 6px; }
+  .civ-label { font-size: 10px; }
+  .civ-num { font-size: 10px; }
+}
+
 /* Rendu markdown (page méthodologie) */
 .prose { line-height: 1.65; }
 .prose h1, .prose h2, .prose h3 { margin: 28px 0 10px; }
