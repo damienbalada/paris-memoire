@@ -1,12 +1,12 @@
-"""Import CDP : note climat (evidence pending).
+"""Import CDP : notes climat & eau (evidence pending).
 
 Usage :
-    # CSV avec au moins : company + cdp_climate (lettre A..D- / F)
+    # CSV avec company + cdp_climate et/ou cdp_water (lettre A..D- / F)
     python -m paris_memoire.import_cdp --file cdp.csv            # dry-run
     python -m paris_memoire.import_cdp --file cdp.csv --apply    # écrit (pending)
 
 Comme tout le pipeline : evidence en `pending` (revue humaine avant de compter),
-note climat portée par le GROUPE (les marques héritent), matching conservateur.
+notes CDP consolidées au niveau du GROUPE (les marques héritent), matching conservateur.
 """
 from __future__ import annotations
 
@@ -28,13 +28,20 @@ def build_rows(entities: list[dict], records: list[cdp.CdpRecord], observed_on: 
         m = cdp.match_company(e, records)
         if m is None:
             continue
-        rows.append(EvidenceRow(
-            entity_slug=e["slug"], indicator_code="ENV_CDP_CLIMATE", source_code=SOURCE_CODE,
-            nature="result", observed_on=observed_on, value_type="ordinal",
-            value_text=m.grade, normalized_value=m.normalized_value, confidence=0.85,
-            source_url=cdp.CDP_SOURCE_URL,
-            excerpt=f"Note climat CDP : {m.grade} ({m.company}).",
-        ))
+        for indicator_code, note, label in (
+            ("ENV_CDP_CLIMATE", m.climate, "climat"),
+            ("WAT_CDP", m.water, "eau"),
+        ):
+            if note is None:
+                continue
+            grade, nv = note
+            rows.append(EvidenceRow(
+                entity_slug=e["slug"], indicator_code=indicator_code, source_code=SOURCE_CODE,
+                nature="result", observed_on=observed_on, value_type="ordinal",
+                value_text=grade, normalized_value=nv, confidence=0.85,
+                source_url=cdp.CDP_SOURCE_URL,
+                excerpt=f"Note CDP {label} : {grade} ({m.company}).",
+            ))
     return rows
 
 

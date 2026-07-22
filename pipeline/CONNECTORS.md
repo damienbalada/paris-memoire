@@ -27,10 +27,10 @@ Colonne `source_url` facultative partout (sinon URL par défaut du connecteur).
 
 ## Environnement (ENV)
 
-### CDP — note climat → `ENV_CDP_CLIMATE`
-- CSV : `company` + `cdp_climate` (lettre `A`, `A-`, … `D-`, `F`)
+### CDP — notes climat & eau → `ENV_CDP_CLIMATE`, `WAT_CDP`
+- CSV : `company` + `cdp_climate` et/ou `cdp_water` (lettre `A`, `A-`, … `D-`, `F`)
 - Barème canonique : `A=1.00, A-=0.88, B=0.75, B-=0.63, C=0.50, C-=0.38, D=0.25, D-=0.13, F=0.00`
-- Niveau : groupe · Source : `CDP`
+- Niveau : groupe · Source : `CDP` (écrit un ou deux indicateurs selon les colonnes présentes)
 ```bash
 python -m paris_memoire.import_cdp --file cdp.csv [--apply]
 ```
@@ -41,6 +41,22 @@ python -m paris_memoire.import_cdp --file cdp.csv [--apply]
 - Niveau : groupe · Source : `SBTI`
 ```bash
 python -m paris_memoire.import_sbti --file sbti.csv [--apply]
+```
+
+---
+
+## Plastique (PLA)
+
+### BFFP — pollueurs plastique → `PLA_POLLUTER` (gate)
+- CSV : nom (`company`/`brand`) + `rank` (rang mondial) ou `band` (top3/top10/top50)
+- ⚠️ **Gate écrit comme controverse** : `normalized_value` = **sévérité** (haute = fort
+  pollueur). Le moteur en dérive le PLAFOND de la dimension via sa logique de
+  controverse — `plafond ≈ 0.5×(1 − sévérité×poids_tier)` — donc plus la sévérité
+  est haute, plus la note plastique est bridée. Ne PAS fournir un plafond direct.
+- Barème rang → sévérité : `#1=0.90, #2=0.80, #3=0.75, top10=0.60, top50=0.45, au-delà=0.35`
+- Niveau : groupe ou marque · Source : `BFFP`
+```bash
+python -m paris_memoire.import_bffp --file bffp.csv [--apply]
 ```
 
 ---

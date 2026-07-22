@@ -1,12 +1,12 @@
-"""Connecteur CDP — note climat (Carbon Disclosure Project).
+"""Connecteur CDP — notes climat & eau (Carbon Disclosure Project).
 
-Rend ré-ingérable la curation manuelle CDP des seeds ENV (26-31). Module PUR :
+Rend ré-ingérable la curation manuelle CDP des seeds ENV/WAT. Module PUR :
 parsing + normalisation + matching ; l'accès réseau/DB via import_cdp.py.
 
-Produit ENV_CDP_CLIMATE (ordinal). La note CDP est une lettre A (leadership) à
-D- (disclosure), plus F (« n'a pas répondu »). On pose un barème CANONIQUE et
-régulier sur [0,1] : A=1.00 … D-=0.13, F=0.00. C'est une échelle documentée et
-stable (les anciens seeds divergeaient légèrement — ce connecteur fait foi).
+Produit ENV_CDP_CLIMATE (climat) et/ou WAT_CDP (sécurité de l'eau), tous deux
+ordinaux. La note CDP est une lettre A (leadership) à D- (disclosure), plus F
+(« n'a pas répondu »). On pose un barème CANONIQUE et régulier sur [0,1] :
+A=1.00 … D-=0.13, F=0.00 — échelle documentée et stable (ce connecteur fait foi).
 
 CDP répond au niveau de l'entité déclarante (le groupe) : evidence portée par le
 GROUPE, héritée par les marques. Matching de noms conservateur.
@@ -21,7 +21,8 @@ from ..normalize.names import is_strong_match
 CDP_SOURCE_URL = "https://www.cdp.net/"
 
 NAME_COLS = ("company", "name", "entity", "société", "nom")
-GRADE_COLS = ("cdp_climate", "cdp", "grade", "score", "note", "climate")
+CLIMATE_COLS = ("cdp_climate", "cdp", "grade", "score", "note", "climate", "climat")
+WATER_COLS = ("cdp_water", "water", "eau", "water_security")
 
 # Barème canonique lettre -> [0,1] (8 bandes A..D- + F).
 GRADE_MAP = {
@@ -36,8 +37,8 @@ GRADE_MAP = {
 @dataclass
 class CdpRecord:
     company: str
-    grade: str            # lettre normalisée (ex. 'A-')
-    normalized_value: float
+    climate: tuple[str, float] | None = None   # (grade, normalized) climat
+    water: tuple[str, float] | None = None      # (grade, normalized) eau
 
 
 def parse_grade(raw: str | None) -> tuple[str, float] | None:
@@ -67,11 +68,11 @@ def parse_csv(path: str) -> list[CdpRecord]:
             name = _pick(row, NAME_COLS)
             if not name:
                 continue
-            g = parse_grade(_pick(row, GRADE_COLS))
-            if g is None:
-                continue
-            grade, nv = g
-            out.append(CdpRecord(company=name.strip(), grade=grade, normalized_value=nv))
+            climate = parse_grade(_pick(row, CLIMATE_COLS))
+            water = parse_grade(_pick(row, WATER_COLS))
+            if climate is None and water is None:
+                continue  # ni climat ni eau exploitables
+            out.append(CdpRecord(company=name.strip(), climate=climate, water=water))
     return out
 
 
