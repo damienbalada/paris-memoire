@@ -121,6 +121,21 @@ python -m paris_memoire.import_benchmarks --benchmark bbfaw --file bbfaw.csv [--
 
 ---
 
+## Investissements & Finance éthique (INV)
+
+### `INV_RESPONSIBLE_POLICY` · `INV_SUSTAINABLE_FINANCE` · `INV_FOSSIL_FINANCING` · `INV_CONTROVERSIAL_HOLDINGS`
+- CSV : `company` + au moins une de : `responsible_policy` (none/policy/signatory),
+  `sustainable_finance` (none/occasional/framework), `fossil_financing` (montant),
+  `controversial_holdings` (nombre). Alias FR acceptés.
+- Statuts normalisés ici (absent 0.0 / politique 0.5 / signataire 1.0) ; **fossile
+  et participations en valeur brute** (percentile inversé `lower_better` par le moteur).
+- Niveau : groupe · Sources : `UN_PRI` (politique / finance durable), `RECLAIM_FINANCE` (fossile / participations)
+```bash
+python -m paris_memoire.import_investments --file inv.csv [--apply]
+```
+
+---
+
 ## Géopolitique (GEO)
 
 - **HATVP** (lobbying France) → `import_hatvp` · Source `HATVP`

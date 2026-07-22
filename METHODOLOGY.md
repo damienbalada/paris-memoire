@@ -254,6 +254,7 @@ pas du nombre de marques. Trois garde-fous invariants :
 | Gouvernance | GOV | mixité (parité=1.0) + indépendance du conseil | déclarations CSRD/ESRS | groupe |
 | Fiscalité | TAX | CbCR (oui/non), taux effectif (%), nb d'entités en paradis fiscaux | CbCR, états financiers, Tax Justice Network | groupe |
 | Benchmarks | ANI, SUP | BBFAW (Tier 1→1.0 … 6→0.10), KnowTheChain (/100), FTI (%) | BBFAW, BHRRC, Fashion Revolution | groupe ou marque |
+| Finance éthique | INV | politique responsable & finance durable (statut) ; financement fossile & participations controversées (valeur brute) | UN PRI, Reclaim Finance | groupe |
 
 Les quantitatifs (taux effectif, présence en paradis fiscaux) sont chargés en
 **valeur brute** : c'est le moteur qui calcule le percentile intra-secteur et

@@ -24,6 +24,7 @@ export const CONNECTORS: Connector[] = [
   { name: "Gouvernance", pillar: "GOV", produces: "Mixité (parité = 1.0) + indépendance du conseil", source: "Déclarations CSRD / ESRS", level: "groupe" },
   { name: "Fiscalité", pillar: "TAX", produces: "CbCR (oui/non), taux effectif (%), entités en paradis fiscaux", source: "CbCR, états financiers, Tax Justice Network", level: "groupe" },
   { name: "Benchmarks", pillar: "ANI, SUP", produces: "BBFAW (Tier 1→1.0 … 6→0.10), KnowTheChain (/100), FTI (%)", source: "BBFAW, BHRRC, Fashion Revolution", level: "groupe ou marque" },
+  { name: "Finance éthique", pillar: "INV", produces: "Politique responsable & finance durable (statut) ; financement fossile & participations controversées (valeur brute)", source: "UN PRI, Reclaim Finance", level: "groupe" },
 ];
 
 export type Guard = { title: string; body: string };
