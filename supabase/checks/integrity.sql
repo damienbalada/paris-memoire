@@ -45,6 +45,24 @@ select verif, n from (
   union all
   select 'alias_norme_vide', count(*)
     from entity_aliases where coalesce(norm, '') = ''
+  -- Cohérence des indicateurs-gate : la sémantique de `normalized_value` dépend de
+  -- la nature (result -> plafond direct ; controversy -> sévérité convertie en
+  -- plafond). Un gate qui mélange les natures casse cette interprétation.
+  union all
+  select 'gate_natures_incoherentes', count(*) from (
+    select dg.gate_indicator_id
+      from dimension_gates dg
+      join evidence ev on ev.indicator_id = dg.gate_indicator_id and ev.review_status = 'approved'
+     group by dg.gate_indicator_id
+    having count(distinct ev.nature) > 1
+  ) g
+  -- Valeur exploitable : une preuve approuvée sans normalized/numeric/boolean
+  -- retombe silencieusement sur 0.5 dans le moteur (ni bon ni mauvais signal).
+  union all
+  select 'evidence_approuvee_sans_valeur', count(*)
+    from evidence
+   where review_status = 'approved'
+     and normalized_value is null and value_numeric is null and value_boolean is null
 ) t
 where n > 0
 order by verif;

@@ -404,6 +404,49 @@ test("fraîcheur — aucune preuve : last_observed null", () => {
   assert.equal(res.last_observed, null);
 });
 
+// --- Quantitatif higher_better (percentile, ex. taux effectif d'imposition) --
+test("normalisation — quantitatif higher_better via percentile intra-secteur", () => {
+  const res = computeScore(baseInput({
+    applicableIndicators: [ind("TAX_ETR", "ENV", { kind: "quantitative", direction: "higher_better" })],
+    evidence: [ev({ indicator_code: "TAX_ETR", nature: "result", value_numeric: 100 })],
+    peerValues: { TAX_ETR: [10, 50, 100, 200] }, // 100 est plutôt haut -> bon pour higher_better
+    profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+  }));
+  // percentile(100) = (2 + 0.5)/4 = 0.625 ; higher_better -> 0.625
+  assert.ok(Math.abs(res.dimensions[0].indicators[0].value! - 0.625) < 1e-9);
+});
+
+// --- Gate PLA : sévérité de la controverse -> plafond (verrou anti-régression) -
+// Le gate PLA_POLLUTER est écrit comme une CONTROVERSE : normalized = sévérité.
+// Le moteur en dérive le plafond (0.5*(1 - sévérité*poids_tier)). Plus la sévérité
+// est haute (pire pollueur), plus la note plastique est bridée. Ce test verrouille
+// cette sémantique subtile (ne PAS traiter normalized comme un plafond direct).
+test("gate PLA — une sévérité BFFP plus haute bride davantage la note plastique", () => {
+  const mk = (severity: number) => {
+    const res = computeScore(baseInput({
+      applicableIndicators: [
+        ind("PLA_REDUCTION", "ENV", { weight: 1 }),
+        ind("PLA_POLLUTER", "ENV", { weight: 0, kind: "categorical" }), // gate
+      ],
+      evidence: [
+        ev({ indicator_code: "PLA_REDUCTION", nature: "result", normalized_value: 1.0 }),
+        ev({ indicator_code: "PLA_POLLUTER", nature: "controversy", tier: "audited_ngo",
+             normalized_value: severity, source_code: "BFFP" }),
+      ],
+      dimensionGates: [{ dimension_code: "ENV", gate_indicator_code: "PLA_POLLUTER", default_ceiling: 1.0 }],
+      dimensions: [{ code: "ENV", name: "Env" }],
+      profileWeights: [{ dimension_code: "ENV", weight: 1 }],
+    }));
+    return res.dimensions.find((d) => d.dimension_code === "ENV")!;
+  };
+  const worst = mk(0.90); // #1 pollueur mondial
+  const minor = mk(0.60); // top 10
+  assert.ok(Math.abs(worst.score - 0.14) < 1e-9); // 0.5*(1 - 0.90*0.8)
+  assert.ok(Math.abs(minor.score - 0.26) < 1e-9); // 0.5*(1 - 0.60*0.8)
+  assert.ok(worst.score < minor.score);           // le pire pollueur est plus bridé
+  assert.equal(worst.capped_by_gate, true);
+});
+
 // --- Notes lettrées ----------------------------------------------------------
 test("toGrade — seuils", () => {
   assert.equal(toGrade(0.85), "A");
