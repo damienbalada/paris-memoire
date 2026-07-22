@@ -7,7 +7,7 @@ export const METHODOLOGY_MD = `# Méthodologie — DIAMS
 > chaque point de note renvoie à une preuve sourcée et datée. La méthodo est
 > publique et versionnée : c'est la condition de la confiance.
 
-Version : \`0.3.0\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
+Version : \`0.4.0\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
 
 ---
@@ -140,8 +140,8 @@ score global  +  INDICE DE CONFIANCE (séparé) = entity_coverage
 | SUP | Chaîne d'appro & Droits humains | bien-être des **animaux humains**, en amont |
 | ANI | Bien-être animal (non-humain) | élevage, cuirs, laine, duvet, fourrure, tests, abattage |
 | GEO | Géopolitique & Prises de position | conflits/occupations (ONU, CIJ), position Russie (Yale), lobbying (registre UE, OpenSecrets), financement politique |
-| TAX | Fiscalité | CbCR, juridictions à faible imposition |
-| GOV | Gouvernance | conseil, sanctions |
+| TAX | Fiscalité | reporting pays-par-pays (CbCR), taux effectif d'imposition, juridictions à faible imposition |
+| GOV | Gouvernance | mixité et indépendance du conseil, sanctions |
 | INV | Investissements & Finance éthique | finance durable, désinvestissement fossile, participations controversées — *pertinent selon le secteur* |
 
 ### Pertinence sectorielle (non-applicabilité ≠ absence de donnée)
@@ -227,8 +227,43 @@ Voir \`supabase/seed/03_sources.sql\` pour le registre complet. Règle d'or :
 
 ---
 
-## 7. Statut
+## 7. Ingestion — connecteurs déterministes
 
-Document vivant (v\`0.3.0\`, juillet 2026). Toute modification des paramètres de
+Les faits n'entrent jamais « à la main » à l'échelle. Chaque source institutionnelle
+est ingérée par un **connecteur** : du code **pur et déterministe** (parsing +
+normalisation + matching de noms), donc **0 token de modèle** — le coût ne dépend
+pas du nombre de marques. Trois garde-fous invariants :
+
+1. **Matching conservateur.** Un fait n'est rattaché à une entité que si les noms
+   correspondent nettement (\`is_strong_match\`). En cas de doute : on saute, on ne
+   devine pas.
+2. **Écriture en \`pending\`.** Aucun connecteur ne publie directement. Toute
+   evidence attend la **revue humaine** (back-office) avant de compter dans un score.
+3. **Niveau de rattachement explicite.** Gouvernance, fiscalité et note climat sont
+   consolidées au niveau **groupe** (héritées par les marques) ; les benchmarks
+   peuvent noter une **marque** (ex. FTI note Gucci) et s'y rattachent alors.
+
+| Connecteur | Pilier | Indicateur(s) | Source | Niveau |
+|---|---|---|---|---|
+| GLEIF / SIRENE | — | résolution d'entités (LEI/SIREN) | GLEIF, INSEE | — |
+| OpenFoodFacts / Wikidata | — | univers de marques + chaînes de détention | OFF, Wikidata | — |
+| HATVP | GEO | lobbying (France) | HATVP | groupe |
+| Yale | GEO | position Russie | Yale CELI | groupe |
+| SBTi | ENV | objectifs climat validés (anti-greenwashing) | SBTi | groupe |
+| CDP | ENV | note climat A..D- (barème canonique A=1.00 … D-=0.13, F=0) | CDP | groupe |
+| Gouvernance | GOV | mixité (parité=1.0) + indépendance du conseil | déclarations CSRD/ESRS | groupe |
+| Fiscalité | TAX | CbCR (oui/non), taux effectif (%), nb d'entités en paradis fiscaux | CbCR, états financiers, Tax Justice Network | groupe |
+| Benchmarks | ANI, SUP | BBFAW (Tier 1→1.0 … 6→0.10), KnowTheChain (/100), FTI (%) | BBFAW, BHRRC, Fashion Revolution | groupe ou marque |
+
+Les quantitatifs (taux effectif, présence en paradis fiscaux) sont chargés en
+**valeur brute** : c'est le moteur qui calcule le percentile intra-secteur et
+applique la direction (\`higher_better\` / \`lower_better\`). Normaliser à la main
+fausserait la comparaison sectorielle.
+
+---
+
+## 8. Statut
+
+Document vivant (v\`0.4.0\`, juillet 2026). Toute modification des paramètres de
 calcul (tables de config) doit être datée et justifiée ici.
 `;

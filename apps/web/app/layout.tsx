@@ -19,6 +19,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </a>
             <span className="row" style={{ gap: 14 }}>
               <a className="muted small" href="/classement">Classement</a>
+              <a className="muted small" href="/pipeline">Pipeline</a>
               <a className="muted small" href="/methodologie">Méthodologie</a>
             </span>
           </header>
