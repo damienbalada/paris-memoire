@@ -21,7 +21,8 @@
 | INV | `import_investments --file inv.csv` | `responsible_policy`, `fossil_financing`, … | `INV_*` |
 
 (Toutes les commandes : `python -m paris_memoire.<commande>` ; ajouter `--apply` pour écrire.)
-Détail de chaque connecteur ci-dessous.
+Détail de chaque connecteur ci-dessous. Un CSV d'exemple par connecteur (en-têtes
+réels, données fictives) est fourni dans [`examples/`](./examples/).
 
 ## Invariants (tous connecteurs)
 
