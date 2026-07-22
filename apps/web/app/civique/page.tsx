@@ -27,8 +27,8 @@ function shares(stance: string, nFor: number | null, nAgainst: number | null, nA
   }
   if (stance === "for") return { pour: 100, contre: 0, abstain: 0, label: "pour" };
   if (stance === "against") return { pour: 0, contre: 100, abstain: 0, label: "contre" };
-  if (stance === "abstain") return { pour: 0, contre: 0, abstain: 100, label: "abstention" };
-  return { pour: 50, contre: 50, abstain: 0, label: "partagé" }; // split sans décompte -> indicatif
+  if (stance === "abstain") return { pour: 0, contre: 0, abstain: 100, label: "abst." };
+  return { pour: 50, contre: 50, abstain: 0, label: "mixte" }; // split sans décompte -> indicatif
 }
 
 // Une ligne = un groupe (ou l'ensemble). Barre divergente : contre à gauche,

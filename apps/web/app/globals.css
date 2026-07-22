@@ -107,10 +107,11 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
   .prose table { display: block; max-width: 100%; overflow-x: auto; white-space: nowrap; }
   /* Classement : masquer les colonnes secondaires (garde #, Entité, Note, Fiabilité) */
   .col-hide-mobile { display: none; }
-  /* Graphe civique : colonnes latérales resserrées */
-  .civ-row { grid-template-columns: 58px 1fr 46px; gap: 6px; }
-  .civ-label { font-size: 10px; }
-  .civ-num { font-size: 10px; }
+  /* Graphe civique : colonnes latérales resserrées, débordement maîtrisé */
+  .civ-row { grid-template-columns: 56px 1fr 44px; gap: 6px; }
+  .civ-label { font-size: 10px; overflow: hidden; text-overflow: ellipsis; }
+  .civ-num { font-size: 10px; overflow-wrap: anywhere; line-height: 1.15; }
+  .civ-legend { font-size: 11px; gap: 6px 12px; }
 }
 
 /* Rendu markdown (page méthodologie) */
