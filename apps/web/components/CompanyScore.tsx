@@ -186,7 +186,7 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
   const covered = d.indicators.filter((i) => i.covered);
   return (
     <div className="panel">
-      <div className="row between">
+      <div className="row between wrap" style={{ gap: 6 }}>
         <div className="row" style={{ gap: 10 }}>
           <div className={`grade sm grade-${d.grade}`}>{d.grade}</div>
           <strong>{d.name}</strong>
