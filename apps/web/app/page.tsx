@@ -36,11 +36,12 @@ export default async function HomePage() {
       <p className="muted">
         <strong>D</strong>iagnostic <strong>I</strong>ndépendant, <strong>A</strong>uditable et{" "}
         <strong>M</strong>ulti-critères des <strong>S</strong>ociétés. Une note par dimension, un indice
-        de fiabilité affiché à part, et chaque point traçable jusqu'à sa source datée.{" "}
-        <a href="/classement" style={{ textDecoration: "underline" }}>Voir le classement →</a>
-        {" · "}
-        <a href="/civique" style={{ textDecoration: "underline" }}>DIAMS Civique (votes des partis) →</a>
+        de fiabilité affiché à part, et chaque point traçable jusqu'à sa source datée.
       </p>
+      <div className="row wrap" style={{ gap: 10, margin: "12px 0 4px" }}>
+        <a className="btn" href="/classement">Voir le classement →</a>
+        <a className="btn" href="/civique">DIAMS Civique (votes des partis) →</a>
+      </div>
 
       {error && (
         <div className="panel" style={{ borderColor: "#6b2222" }}>

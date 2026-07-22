@@ -21,9 +21,9 @@ function Table({ rows, ranked = true }: { rows: EntityScore[]; ranked?: boolean 
             {ranked && <th style={{ textAlign: "left", padding: "6px 4px" }}>#</th>}
             <th style={{ textAlign: "left", padding: "6px 4px" }}>Entité</th>
             <th style={{ textAlign: "center", padding: "6px 4px" }}>Note</th>
-            <th style={{ textAlign: "right", padding: "6px 4px" }}>Score</th>
+            <th className="col-hide-mobile" style={{ textAlign: "right", padding: "6px 4px" }}>Score</th>
             <th style={{ textAlign: "right", padding: "6px 4px" }}>Fiabilité</th>
-            <th style={{ textAlign: "right", padding: "6px 4px" }}>Mis à jour</th>
+            <th className="col-hide-mobile" style={{ textAlign: "right", padding: "6px 4px" }}>Mis à jour</th>
           </tr>
         </thead>
         <tbody>
@@ -41,9 +41,9 @@ function Table({ rows, ranked = true }: { rows: EntityScore[]; ranked?: boolean 
                   <span className="muted small">—</span>
                 )}
               </td>
-              <td style={{ textAlign: "right", padding: "8px 4px" }} className={ranked ? "" : "muted"}>{pct(r.score)}</td>
+              <td style={{ textAlign: "right", padding: "8px 4px" }} className={`col-hide-mobile ${ranked ? "" : "muted"}`}>{pct(r.score)}</td>
               <td className="muted" style={{ textAlign: "right", padding: "8px 4px" }}>{pct(r.confidence)}</td>
-              <td className="muted small" style={{ textAlign: "right", padding: "8px 4px" }}>{frYearMonth(r.last_observed)}</td>
+              <td className="muted small col-hide-mobile" style={{ textAlign: "right", padding: "8px 4px" }}>{frYearMonth(r.last_observed)}</td>
             </tr>
           ))}
         </tbody>

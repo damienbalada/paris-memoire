@@ -105,6 +105,8 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
   .slider-row { grid-template-columns: 104px 1fr 38px; gap: 8px; }
   /* Tableaux (méthodo, pipeline) : défilement horizontal au lieu de déborder */
   .prose table { display: block; max-width: 100%; overflow-x: auto; white-space: nowrap; }
+  /* Classement : masquer les colonnes secondaires (garde #, Entité, Note, Fiabilité) */
+  .col-hide-mobile { display: none; }
   /* Graphe civique : colonnes latérales resserrées */
   .civ-row { grid-template-columns: 58px 1fr 46px; gap: 6px; }
   .civ-label { font-size: 10px; }
