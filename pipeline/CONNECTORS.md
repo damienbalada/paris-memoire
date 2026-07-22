@@ -45,6 +45,21 @@ python -m paris_memoire.import_sbti --file sbti.csv [--apply]
 
 ---
 
+## Travail & Rémunération (LAB)
+
+### Égapro — index égalité professionnelle F/H → `LAB_EGAPRO_INDEX`
+- **Pas de CSV** : interroge l'open data ODS (`data.economie.gouv.fr`) pour les
+  SIREN déjà renseignés en base (via `enrich_entities`).
+- **Rapprochement par SIREN exact uniquement** — la donnée est indexée par SIREN ;
+  pas de matching par nom (raisons sociales trop ambiguës). Garde l'année la plus récente.
+- Normalisation : note / 100 · Niveau : entité portant le SIREN (groupe)
+- Source : `EGAPRO` (réglementaire, Ministère du Travail)
+```bash
+python -m paris_memoire.import_egapro [--apply]
+```
+
+---
+
 ## Gouvernance (GOV)
 
 ### `GOV_BOARD_GENDER` + `GOV_BOARD_INDEP`

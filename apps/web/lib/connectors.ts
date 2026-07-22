@@ -19,6 +19,7 @@ export const CONNECTORS: Connector[] = [
   { name: "Yale", pillar: "GEO", produces: "Position Russie", source: "Yale CELI", level: "groupe" },
   { name: "SBTi", pillar: "ENV", produces: "Objectifs climat validés (anti-greenwashing)", source: "Science Based Targets initiative", level: "groupe" },
   { name: "CDP", pillar: "ENV", produces: "Note climat A..D- (barème canonique A=1.00 … D-=0.13, F=0)", source: "CDP", level: "groupe" },
+  { name: "Égapro", pillar: "LAB", produces: "Index égalité professionnelle F/H (/100), rapprochement par SIREN exact", source: "Ministère du Travail (Égapro)", level: "groupe" },
   { name: "Gouvernance", pillar: "GOV", produces: "Mixité (parité = 1.0) + indépendance du conseil", source: "Déclarations CSRD / ESRS", level: "groupe" },
   { name: "Fiscalité", pillar: "TAX", produces: "CbCR (oui/non), taux effectif (%), entités en paradis fiscaux", source: "CbCR, états financiers, Tax Justice Network", level: "groupe" },
   { name: "Benchmarks", pillar: "ANI, SUP", produces: "BBFAW (Tier 1→1.0 … 6→0.10), KnowTheChain (/100), FTI (%)", source: "BBFAW, BHRRC, Fashion Revolution", level: "groupe ou marque" },

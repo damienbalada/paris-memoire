@@ -251,6 +251,7 @@ pas du nombre de marques. Trois garde-fous invariants :
 | Yale | GEO | position Russie | Yale CELI | groupe |
 | SBTi | ENV | objectifs climat validés (anti-greenwashing) | SBTi | groupe |
 | CDP | ENV | note climat A..D- (barème canonique A=1.00 … D-=0.13, F=0) | CDP | groupe |
+| Égapro | LAB | index égalité F/H (/100), rapprochement par SIREN exact | Ministère du Travail | groupe |
 | Gouvernance | GOV | mixité (parité=1.0) + indépendance du conseil | déclarations CSRD/ESRS | groupe |
 | Fiscalité | TAX | CbCR (oui/non), taux effectif (%), nb d'entités en paradis fiscaux | CbCR, états financiers, Tax Justice Network | groupe |
 | Benchmarks | ANI, SUP | BBFAW (Tier 1→1.0 … 6→0.10), KnowTheChain (/100), FTI (%) | BBFAW, BHRRC, Fashion Revolution | groupe ou marque |
