@@ -3,8 +3,12 @@
 Prérequis : les SIREN doivent être renseignés (via enrich_entities).
 
 Usage :
-    python -m paris_memoire.import_egapro            # dry-run
-    python -m paris_memoire.import_egapro --apply     # écrit (pending)
+    python -m paris_memoire.import_egapro                       # dry-run (API ODS live)
+    python -m paris_memoire.import_egapro --apply               # écrit (pending)
+    python -m paris_memoire.import_egapro --file egapro.csv     # fallback hors-ligne
+
+Le fallback CSV attend au moins : siren + note (+ annee, raison_sociale). Utile
+quand l'API ODS n'est pas joignable (politique réseau) ou pour rejouer un export.
 """
 from __future__ import annotations
 
@@ -38,15 +42,20 @@ def build_rows(entities: list[dict], by_siren: dict[str, egapro.EgaproRecord]) -
 def main() -> None:
     parser = argparse.ArgumentParser(description="Import Égapro (index égalité F/H).")
     parser.add_argument("--apply", action="store_true", help="écrit en base (sinon dry-run)")
+    parser.add_argument("--file", help="CSV Égapro (fallback hors-ligne : siren + note)")
     args = parser.parse_args()
 
     entities = supabase_client.list_entities()
-    sirens = sorted({str(e["siren"]) for e in entities if e.get("siren")})
-    if not sirens:
-        raise SystemExit("Aucun SIREN renseigné — lancer d'abord enrich_entities.")
-    print(f"{len(sirens)} SIREN à interroger")
 
-    records = egapro.fetch_for_sirens(sirens)
+    if args.file:
+        records = egapro.parse_csv(args.file)
+        print(f"{len(records)} lignes Égapro lues depuis {args.file}")
+    else:
+        sirens = sorted({str(e["siren"]) for e in entities if e.get("siren")})
+        if not sirens:
+            raise SystemExit("Aucun SIREN renseigné — lancer d'abord enrich_entities.")
+        print(f"{len(sirens)} SIREN à interroger")
+        records = egapro.fetch_for_sirens(sirens)
     by_siren = egapro.latest_by_siren(records)
     print(f"{len(by_siren)} index Égapro trouvés")
 

@@ -1,4 +1,9 @@
-from paris_memoire.connectors.egapro import EgaproRecord, latest_by_siren, parse_records
+from paris_memoire.connectors.egapro import (
+    EgaproRecord,
+    latest_by_siren,
+    parse_csv,
+    parse_records,
+)
 from paris_memoire.import_egapro import build_rows
 
 PAYLOAD = {
@@ -37,3 +42,25 @@ def test_build_rows_normalizes_over_100():
     assert r.entity_slug == "kering"
     assert r.normalized_value == 0.94
     assert r.observed_on == "2024-03-01"
+
+
+def test_parse_csv_offline_fallback(tmp_path):
+    p = tmp_path / "egapro.csv"
+    p.write_text(
+        "siren,raison_sociale,annee,note\n"
+        "552075020,KERING,2024,94\n"
+        "000000000,SANS NOTE,2024,\n"     # note vide -> sautée
+        ",VIDE,2024,50\n",               # siren vide -> sautée
+        encoding="utf-8",
+    )
+    recs = parse_csv(str(p))
+    assert [r.siren for r in recs] == ["552075020"]
+    assert recs[0].note == 94.0
+    assert recs[0].year == "2024"
+
+
+def test_parse_csv_french_decimal(tmp_path):
+    p = tmp_path / "egapro.csv"
+    p.write_text('siren,note\n552075020,"88,5"\n', encoding="utf-8")
+    recs = parse_csv(str(p))
+    assert recs[0].note == 88.5
