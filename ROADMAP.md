@@ -84,11 +84,11 @@ Objectif : ne manquer **aucune controverse documentée** (travail forcé, pollut
    ingestion massive, marque → groupe.
 2. **Le scoring est gratuit** (code pur, 0 token) : le coût est borné par le
    nombre de **groupes** curés, pas de marques (héritage).
-3. **Goulet = la revue humaine.** Options à trancher :
-   - communauté de curateurs (modèle Wikipédia / Open Food Facts),
-   - tri assisté (pré-classement automatique, validation humaine),
-   - niveaux de confiance : auto-publication des sources tier-1 régulatoires,
-     revue obligatoire pour presse/ONG.
+3. **Goulet = la revue humaine → TRANCHÉ** (voir [`REVIEW_MODEL.md`](./REVIEW_MODEL.md)) :
+   confiance graduée par tier de source. Auto-publication des tiers 1-2
+   (regulatory + ONG auditée, connecteurs déterministes) ; revue humaine
+   concentrée sur les tiers 3/crowd (presse, contributif). La revue ne croît
+   qu'avec le volume presse/crowd, pas avec le volume total.
 
 ---
 
