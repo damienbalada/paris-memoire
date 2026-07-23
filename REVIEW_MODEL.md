@@ -32,6 +32,39 @@ crowd — minoritaires mais réellement risqués (texte libre, contributions).
   Réputation des contributeurs. Une contribution reste en tier `crowd` (poids
   plancher) tant qu'une **source vérifiable** ne la fait pas monter de tier.
 
+## Rôle de l'agent IA dans la revue (tier 3 / crowd)
+
+**Principe : l'IA remplace l'*effort* de la revue, pas la *responsabilité* de la revue.**
+
+Un agent IA **pleinement autonome** qui publierait le tier 3 sans humain est
+**exclu** — pour des raisons structurelles, pas de principe :
+- **Non déterministe** : ce qui autorise l'auto-publication des tiers 1-2, c'est
+  que les connecteurs sont déterministes (mêmes entrées → mêmes sorties,
+  testables, incapables d'inventer). Un LLM peut **halluciner** source, montant,
+  date. Une seule hallucination publiée ruine la crédibilité. Donner à l'IA le
+  privilège des connecteurs serait une erreur de catégorie.
+- **Responsabilité légale** : le tier 3 contient des accusations nominatives
+  (« travail forcé », « fraude ») → risque de diffamation ; un responsable humain
+  doit rester dans la boucle.
+- **Injection** : la presse est du texte externe → surface d'injection de prompt.
+- **Biais non auditable** : un agent qui décide seul « ce qui compte » injecte
+  ses biais dans un outil qui se veut neutre.
+
+**Rôle retenu — l'IA comme copilote de revue (clé de l'échelle) :** l'agent
+extrait le fait, vérifie que la source le dit bien, compte les sources distinctes
+(corroboration / Règle 4), détecte l'adjudication régulatoire, rédige un excerpt
+**nuancé**, pré-classe sévérité/nature. L'humain **valide ou rejette en un clic**.
+Démultiplie un curateur sans supprimer le point de contrôle.
+
+**Palier intermédiaire autorisé — auto-approbation IA *tracée et bornée* :**
+l'IA peut auto-approuver du tier 3 **uniquement** si :
+- l'evidence est marquée `reviewer = ai:<modèle>` (distincte d'une validation humaine),
+- le poids est **réduit** (jamais au-dessus du tier de sa source),
+- la **contestation est facile** et l'**audit humain par échantillon** est actif.
+
+**Jamais** : une approbation IA rendue *indistinguable* d'un fait validé par un
+humain, ou sans piste d'audit.
+
 ## Garde-fous non négociables
 
 1. **URL de source obligatoire** — aucun fait sans lien vérifiable
