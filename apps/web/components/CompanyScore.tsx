@@ -111,6 +111,13 @@ export function CompanyScore({
             ))}
           </div>
         )}
+
+        {/* Clarification : la fiabilité n'est pas la qualité de l'entreprise. */}
+        <p className="muted small" style={{ marginTop: 14, marginBottom: 0, lineHeight: 1.45 }}>
+          ℹ️ La <strong>fiabilité</strong> mesure la <strong>complétude et la fraîcheur des preuves</strong>,
+          pas la qualité de l'entreprise. Peu de données publiées ou anciennes → fiabilité basse
+          (pas une mauvaise note, une absence de preuves).
+        </p>
       </div>
 
       {/* Encart marque ↔ groupe propriétaire */}
