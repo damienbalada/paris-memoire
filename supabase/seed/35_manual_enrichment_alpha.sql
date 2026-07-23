@@ -124,3 +124,18 @@ join indicators i on i.code='GEO_LOBBYING_ALIGN'
 join sources s on s.code='INFLUENCEMAP'
 where not exists (select 1 from evidence x where x.entity_id=e.id and x.indicator_id=i.id)
 on conflict do nothing;
+
+-- Lot 9 : sanction antitrust récente (Apple, Commission européenne).
+insert into sources (code, name, tier, publisher, url, description) values
+  ('EU_COMPETITION','Commission européenne — Concurrence','regulatory','Commission européenne','https://competition-policy.ec.europa.eu','Décisions antitrust / abus de position dominante de la Commission européenne.')
+on conflict (code) do nothing;
+
+insert into evidence (entity_id, indicator_id, source_id, value_type, value_numeric, value_text, normalized_value,
+   nature, observed_on, confidence, review_status, reviewer, source_url, excerpt)
+select e.id, i.id, s.id, 'numeric'::value_type, 1800.0, '1,8 Md€', 0.10,
+       'result'::evidence_nature, '2024-03-04'::date, 0.85, 'approved'::review_status, 'curation-v1',
+       'https://www.cnbc.com/2024/03/04/apple-hit-with-more-than-1point95-billion-eu-antitrust-fine-over-music-streaming.html',
+       'Amende UE de 1,8 Md€ (mars 2024) pour abus de position dominante (restrictions anti-concurrentielles sur le streaming musical). Recours d''Apple en cours.'
+from entities e join indicators i on i.code='GOV_SANCTIONS' join sources s on s.code='EU_COMPETITION'
+where e.slug='apple' and not exists (select 1 from evidence x where x.entity_id=e.id and x.indicator_id=i.id)
+on conflict do nothing;
