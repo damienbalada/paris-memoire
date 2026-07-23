@@ -87,3 +87,23 @@ join indicators i on i.code='SUP_BHRRC_ALLEG'
 join sources s on s.code='BHRRC'
 where not exists (select 1 from evidence x where x.entity_id=e.id and x.indicator_id=i.id)
 on conflict do nothing;
+
+-- Lot 7 : sanctions réglementaires RGPD (fait régulatoire, non contestable).
+-- Amazon (746 M€) écarté : amende annulée en mars 2026 (proportionnalité).
+insert into sources (code, name, tier, publisher, url, description)
+values ('GDPR_DPA','Autorités de protection des données (RGPD)','regulatory','CNIL / DPC / EDPB','https://edpb.europa.eu','Décisions et sanctions des autorités de protection des données (RGPD).')
+on conflict (code) do nothing;
+
+insert into evidence (entity_id, indicator_id, source_id, value_type, value_numeric, value_text, normalized_value,
+   nature, observed_on, confidence, review_status, reviewer, source_url, excerpt)
+select e.id, i.id, s.id, 'numeric'::value_type, v.montant, v.txt, v.nv,
+       'result'::evidence_nature, v.d::date, v.conf, 'approved'::review_status, 'curation-v1', v.url, v.ex
+from (values
+  ('meta',1200.0,'1,2 Md€',0.10,'2023-05-22',0.90,'https://www.business-humanrights.org/en/latest-news/meta-is-fined-a-record-12-billion-for-violating-gdpr-and-putting-users-privacy-rights-at-risk/','Amende record RGPD de 1,2 Md€ (DPC irlandaise, 2023) pour transferts illicites de données UE vers les États-Unis.'),
+  ('google',90.0,'90 M€',0.40,'2021-12-01',0.85,'https://www.cnil.fr','Sanction CNIL de 90 M€ (2021) sur les cookies (google.fr).')
+) as v(slug, montant, txt, nv, d, conf, url, ex)
+join entities e on e.slug=v.slug
+join indicators i on i.code='GOV_SANCTIONS'
+join sources s on s.code='GDPR_DPA'
+where not exists (select 1 from evidence x where x.entity_id=e.id and x.indicator_id=i.id)
+on conflict do nothing;
