@@ -1,1 +1,1 @@
-"""Pipeline de collecte Awareness Score."""
+"""Pipeline de collecte DIAMS."""

@@ -1,4 +1,6 @@
-# Awareness Score
+# DIAMS
+
+> **DIAMS** — **D**iagnostic **I**ndépendant, **A**uditable et **M**ulti-critères des **S**ociétés.
 
 Moteur de notation **éthique** des entreprises, multi-critères et **traçable** —
 un « B Corp élargi » couvrant environnement, travail/rémunération, chaîne
@@ -21,7 +23,7 @@ jamais eue.
 ## Architecture
 
 ```
-awareness-score/
+diams/
 ├─ apps/web/            # Next.js (App Router) — fiche entreprise + sliders
 ├─ supabase/
 │  ├─ migrations/       # schéma versionné (source de vérité)
