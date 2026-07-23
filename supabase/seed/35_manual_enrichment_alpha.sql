@@ -4,6 +4,10 @@
 -- Lot 1 : AB InBev, adidas, Amazon.
 -- Lot 2 : Apple (CDP A-), AXA (SBTi engagé, non validé).
 -- Lot 3 : Beiersdorf (CDP Triple A → climat+eau A), BMW (CDP climat A), BNP Paribas (CDP climat A).
+-- Lot 4 : Chanel (A-), Google (A), Mercedes-Benz (A-/eau A-), Volkswagen (A-),
+--   Nike (A-), Pernod Ricard (A), Henkel (A-), + eaux Triple A L'Oréal & Danone.
+--   Écartés (pas de score récent vérifiable) : Bonduelle, Carrefour, Microsoft,
+--   Meta, Renault (A de 2020, trop vieux), Stellantis, Starbucks, Heineken.
 -- Barilla examiné mais écarté : Tier BBFAW 2023 ambigu (refonte des critères,
 --   confusion Tier/Impact Rating) et pas de score CDP fiable -> on n'invente pas.
 -- =============================================================================
@@ -22,7 +26,18 @@ from (values
   ('beiersdorf','ENV_CDP_CLIMATE','A',1.00,'2023-01-01',0.82,'https://www.beiersdorf.com/newsroom/press-information/all-press-releases/2024/02/06-beiersdorf-achieves-cdp-triple-a-and-maintains-top-rating-for-leadership-in-sustainability','CDP « Triple A » (climat A, segment Consumer) — un des ~10 « Triple A » mondiaux.'),
   ('beiersdorf','WAT_CDP','A',1.00,'2023-01-01',0.80,'https://www.beiersdorf.com/newsroom/press-information/all-press-releases/2024/02/06-beiersdorf-achieves-cdp-triple-a-and-maintains-top-rating-for-leadership-in-sustainability','CDP « Triple A » : note A en sécurité de l''eau.'),
   ('bmw','ENV_CDP_CLIMATE','A',1.00,'2023-01-01',0.85,'https://www.bmwgroup.com/content/dam/grpw/websites/bmwgroup_com/ir/downloads/en/2024/bericht/BMW_Group_CDP_Climate_Change_Questionnaire_2023.pdf','CDP Climat 2023 : note A (99/100, sector leader) — 8e année consécutive.'),
-  ('bnp-paribas','ENV_CDP_CLIMATE','A',1.00,'2023-01-01',0.82,'https://cdn-group.bnpparibas.com/uploads/file/bnpparibas_cdp_climate_change_questionnaire_2023.pdf','CDP Climat 2023 : note A — en tête des grandes banques (transparence climat ; distincte du financement fossile réel).')
+  ('bnp-paribas','ENV_CDP_CLIMATE','A',1.00,'2023-01-01',0.82,'https://cdn-group.bnpparibas.com/uploads/file/bnpparibas_cdp_climate_change_questionnaire_2023.pdf','CDP Climat 2023 : note A — en tête des grandes banques (transparence climat ; distincte du financement fossile réel).'),
+  -- Lot 4 : balayage CDP (auto, tech, luxe, FMCG). Faits sourcés, année datée.
+  ('chanel','ENV_CDP_CLIMATE','A-',0.88,'2023-01-01',0.70,'https://ditchcarbon.com/organizations/chanel','CDP Climat : note A- (bande Leadership) — score le plus récent rapporté.'),
+  ('google','ENV_CDP_CLIMATE','A',1.00,'2022-01-01',0.72,'https://www.cdp.net/en/data/scores','CDP Climat 2022 : note A (Alphabet) — bande Leadership.'),
+  ('mercedes-benz','ENV_CDP_CLIMATE','A-',0.88,'2024-01-01',0.82,'https://group.mercedes-benz.com/investors/share/esg/','CDP Climat 2024 : note A- (bande Leadership).'),
+  ('mercedes-benz','WAT_CDP','A-',0.88,'2024-01-01',0.80,'https://group.mercedes-benz.com/investors/share/esg/','CDP Eau 2024 : note A- (sécurité de l''eau).'),
+  ('volkswagen','ENV_CDP_CLIMATE','A-',0.88,'2023-01-01',0.80,'https://annualreport2023.volkswagen-group.com/group-management-report/shares-and-bonds/esg-ratings.html','CDP Climat 2023 : note A- (maintenue).'),
+  ('nike','ENV_CDP_CLIMATE','A-',0.88,'2023-01-01',0.72,'https://ditchcarbon.com/organizations/nike','CDP Climat 2023 : note A- (bande Leadership).'),
+  ('pernod-ricard','ENV_CDP_CLIMATE','A',1.00,'2023-01-01',0.80,'https://www.pernod-ricard.com/en/sustainability-responsibility/esg-ratings-reporting','CDP Climat 2023 : note A (bande Leadership).'),
+  ('henkel','ENV_CDP_CLIMATE','A-',0.88,'2023-01-01',0.78,'https://eco-act.com/blog/cdp-scores/','CDP Climat 2023 : note A- (bande Leadership).'),
+  ('loreal','WAT_CDP','A',1.00,'2023-01-01',0.82,'https://www.loreal-finance.com/eng/news-event/loreal-recognized-eighth-year-row-triple-score-environmental-achievements-climate-change','CDP « Triple A » 2023 : note A en sécurité de l''eau (8e année ; un des ~10 Triple A mondiaux).'),
+  ('danone','WAT_CDP','A',1.00,'2023-01-01',0.82,'https://www.danone.com/newsroom/press-releases/danone-recognized-for-the-fifth-year-in-a-row-as-global-environm.html','CDP « Triple A » 2023 : note A en sécurité de l''eau.')
 ) as v(slug, ind, grade, nv, d, conf, url, ex)
 join entities e on e.slug=v.slug
 join indicators i on i.code=v.ind
