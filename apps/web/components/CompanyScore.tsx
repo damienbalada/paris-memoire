@@ -21,6 +21,7 @@ const STALE_BEFORE = new Date(Date.now() - 3 * 365 * 24 * 3600 * 1000)
 const capReason: Record<string, string> = {
   ANI: "exploitation animale",
   PLA: "pollueur plastique majeur",
+  GEO: "lobbying climat désaligné",
 };
 
 export function CompanyScore({

@@ -7,6 +7,8 @@
 --         Henkel) + eaux Triple A (L'Oréal, Danone).
 --   5   : Colgate (Double A), H&M (climat A), McDonald's (SBTi validé).
 --   6   : faits NÉGATIFS documentés (Nestlé/Mars/Mondelez cacao, Shein Xinjiang).
+--   7   : sanctions RGPD (Meta 1,2 Md€, Google 90 M€) — Amazon écarté (annulée).
+--   8   : lobbying climat désaligné (Total, Shell) via gate GEO_LOBBYING_ALIGN.
 -- Écartés (pas de source récente vérifiable) : Barilla, Bonduelle, Carrefour,
 --   Microsoft, Meta, Renault, Stellantis, Starbucks, Heineken, Inditex, Samsung.
 -- =============================================================================
@@ -105,5 +107,20 @@ from (values
 join entities e on e.slug=v.slug
 join indicators i on i.code='GOV_SANCTIONS'
 join sources s on s.code='GDPR_DPA'
+where not exists (select 1 from evidence x where x.entity_id=e.id and x.indicator_id=i.id)
+on conflict do nothing;
+
+-- Lot 8 : lobbying climat désaligné (gate GEO_LOBBYING_ALIGN, cf. migration dédiée).
+insert into evidence (entity_id, indicator_id, source_id, value_type, value_text, normalized_value,
+   nature, observed_on, confidence, review_status, reviewer, source_url, excerpt)
+select e.id, i.id, s.id, 'category'::value_type, v.txt, v.nv,
+       'controversy'::evidence_nature, v.d::date, v.conf, 'approved'::review_status, 'curation-v1', v.url, v.ex
+from (values
+  ('totalenergies','lobbying climat désaligné',0.55,'2023-06-01',0.75,'https://lobbymap.org/company/Total-5a9f086d9a2ce300529ea4eb020d1aa3','LobbyMap (InfluenceMap) : désalignement partiel avec l''Accord de Paris ; lobbying contre le règlement méthane de l''UE (2023).'),
+  ('shell','lobbying climat désaligné',0.60,'2023-06-01',0.72,'https://influencemap.org/pressrelease/Shell-s-net-zero-plan-ignores-company-s-anti-climate-links-322da8e35d2b26f79f2d5bb06fa2d0e4','InfluenceMap : le plan « net zéro » de Shell ne s''appuie pas sur les trajectoires IPCC ; liens de lobbying anti-climat documentés.')
+) as v(slug, txt, nv, d, conf, url, ex)
+join entities e on e.slug=v.slug
+join indicators i on i.code='GEO_LOBBYING_ALIGN'
+join sources s on s.code='INFLUENCEMAP'
 where not exists (select 1 from evidence x where x.entity_id=e.id and x.indicator_id=i.id)
 on conflict do nothing;

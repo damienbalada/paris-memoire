@@ -137,7 +137,7 @@ score global  +  INDICE DE CONFIANCE (séparé) = entity_coverage
 | LAB | Travail & Rémunération | bien-être des **animaux humains**, en interne |
 | SUP | Chaîne d'appro & Droits humains | bien-être des **animaux humains**, en amont |
 | ANI | Bien-être animal (non-humain) | élevage, cuirs, laine, duvet, fourrure, tests, abattage |
-| GEO | Géopolitique & Prises de position | conflits/occupations (ONU, CIJ), position Russie (Yale), lobbying (registre UE, OpenSecrets), financement politique |
+| GEO | Géopolitique & Prises de position | conflits/occupations (ONU, CIJ), position Russie (Yale), lobbying (registre UE, OpenSecrets), **alignement du lobbying climat (InfluenceMap)**, financement politique |
 | TAX | Fiscalité | reporting pays-par-pays (CbCR), taux effectif d'imposition, juridictions à faible imposition |
 | GOV | Gouvernance | mixité et indépendance du conseil, sanctions |
 | INV | Investissements & Finance éthique | finance durable, désinvestissement fossile, participations controversées — *pertinent selon le secteur* |
