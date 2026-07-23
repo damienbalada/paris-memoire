@@ -37,7 +37,11 @@ from (values
   ('pernod-ricard','ENV_CDP_CLIMATE','A',1.00,'2023-01-01',0.80,'https://www.pernod-ricard.com/en/sustainability-responsibility/esg-ratings-reporting','CDP Climat 2023 : note A (bande Leadership).'),
   ('henkel','ENV_CDP_CLIMATE','A-',0.88,'2023-01-01',0.78,'https://eco-act.com/blog/cdp-scores/','CDP Climat 2023 : note A- (bande Leadership).'),
   ('loreal','WAT_CDP','A',1.00,'2023-01-01',0.82,'https://www.loreal-finance.com/eng/news-event/loreal-recognized-eighth-year-row-triple-score-environmental-achievements-climate-change','CDP « Triple A » 2023 : note A en sécurité de l''eau (8e année ; un des ~10 Triple A mondiaux).'),
-  ('danone','WAT_CDP','A',1.00,'2023-01-01',0.82,'https://www.danone.com/newsroom/press-releases/danone-recognized-for-the-fifth-year-in-a-row-as-global-environm.html','CDP « Triple A » 2023 : note A en sécurité de l''eau.')
+  ('danone','WAT_CDP','A',1.00,'2023-01-01',0.82,'https://www.danone.com/newsroom/press-releases/danone-recognized-for-the-fifth-year-in-a-row-as-global-environm.html','CDP « Triple A » 2023 : note A en sécurité de l''eau.'),
+  -- Lot 5 : Colgate-Palmolive (Double A), H&M (climat A).
+  ('colgate-palmolive','ENV_CDP_CLIMATE','A',1.00,'2023-01-01',0.82,'https://investor.colgatepalmolive.com/news-releases/news-release-details/colgate-palmolive-recognized-sp-dow-jones-indices-cdp-its','CDP Double A (climat + eau) — 3e année consécutive.'),
+  ('colgate-palmolive','WAT_CDP','A',1.00,'2023-01-01',0.80,'https://investor.colgatepalmolive.com/news-releases/news-release-details/colgate-palmolive-recognized-sp-dow-jones-indices-cdp-its','CDP Double A : note A en sécurité de l''eau.'),
+  ('hm-group','ENV_CDP_CLIMATE','A',1.00,'2023-01-01',0.80,'https://hmgroup.com/news/hm-group-scores-a-in-climate-leadership-in-new-cdp-ranking/','CDP Climat : note A (leadership).')
 ) as v(slug, ind, grade, nv, d, conf, url, ex)
 join entities e on e.slug=v.slug
 join indicators i on i.code=v.ind
@@ -65,4 +69,15 @@ select e.id, i.id, s.id, 'category'::value_type, 'committed', 1.00,
        'Engagement SBTi (near-term) pris mais pas encore validé (traité comme promesse).'
 from entities e join indicators i on i.code='ENV_SBTI_VALIDATED' join sources s on s.code='SBTI'
 where e.slug='axa' and not exists (select 1 from evidence x where x.entity_id=e.id and x.indicator_id=i.id)
+on conflict do nothing;
+
+-- McDonald's : objectif net-zéro 2050 (+ 2030 ajusté) validé SBTi (2023).
+insert into evidence (entity_id, indicator_id, source_id, value_type, value_text, normalized_value,
+   nature, observed_on, confidence, review_status, reviewer, source_url, excerpt)
+select e.id, i.id, s.id, 'category'::value_type, 'validated', 1.00,
+       'result'::evidence_nature, '2023-01-01'::date, 0.82, 'approved'::review_status, 'curation-v1',
+       'https://corporate.mcdonalds.com/corpmcd/our-purpose-and-impact/our-planet/climate-action.html',
+       'Objectif net-zéro 2050 (+ 2030 ajusté) validé SBTi, trajectoire 1,5°C (2023).'
+from entities e join indicators i on i.code='ENV_SBTI_VALIDATED' join sources s on s.code='SBTI'
+where e.slug='mcdonalds' and not exists (select 1 from evidence x where x.entity_id=e.id and x.indicator_id=i.id)
 on conflict do nothing;
