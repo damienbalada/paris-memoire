@@ -2,6 +2,11 @@
 // Moteur de scoring — logique PURE (aucune dépendance Supabase/Deno).
 // Testable isolément (cf. scoring.test.ts).
 //
+// ⚠️ FICHIER CANONIQUE. Il est MIROITÉ à l'identique dans apps/web/lib/scoring.ts
+// (le web et l'edge function ne peuvent pas partager un import). Ne jamais éditer
+// la copie : modifier CE fichier puis lancer `node scripts/sync-scoring.mjs`.
+// Le test « miroir » (scoring.test.ts) échoue si les deux fichiers divergent.
+//
 // Pipeline :
 //   evidence active (héritée groupe→marque)
 //     -> normalisation [0,1] (intra-secteur pour le quantitatif)

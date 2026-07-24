@@ -447,6 +447,25 @@ test("gate PLA — une sévérité BFFP plus haute bride davantage la note plast
   assert.equal(worst.capped_by_gate, true);
 });
 
+// --- Garde-fou miroir --------------------------------------------------------
+// Le moteur existe en deux exemplaires (edge Deno + web Next.js) faute d'import
+// partageable. Ce test échoue si les copies divergent — une divergence
+// silencieuse produirait des notes différentes entre l'API et le site.
+test("miroir — scoring.ts (edge) et apps/web/lib/scoring.ts sont identiques", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { fileURLToPath } = await import("node:url");
+  const { dirname, join } = await import("node:path");
+  const here = dirname(fileURLToPath(import.meta.url));
+  const root = join(here, "..", "..", "..");
+  const canonical = readFileSync(join(here, "scoring.ts"), "utf8");
+  const mirror = readFileSync(join(root, "apps/web/lib/scoring.ts"), "utf8");
+  assert.equal(
+    mirror,
+    canonical,
+    "Divergence détectée : lancer `node scripts/sync-scoring.mjs` après avoir édité le fichier canonique.",
+  );
+});
+
 // --- Notes lettrées ----------------------------------------------------------
 test("toGrade — seuils", () => {
   assert.equal(toGrade(0.85), "A");

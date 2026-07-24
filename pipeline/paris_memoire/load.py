@@ -48,18 +48,33 @@ def _lookup_ids(client: httpx.Client) -> tuple[dict, dict, dict]:
     base = f"{config.SUPABASE_URL}/rest/v1"
     ents = client.get(f"{base}/entities", params={"select": "id,slug"}, headers=_headers())
     inds = client.get(f"{base}/indicators", params={"select": "id,code"}, headers=_headers())
-    srcs = client.get(f"{base}/sources", params={"select": "id,code"}, headers=_headers())
+    srcs = client.get(f"{base}/sources", params={"select": "id,code,tier"}, headers=_headers())
     for r in (ents, inds, srcs):
         r.raise_for_status()
     return (
         {e["slug"]: e["id"] for e in ents.json()},
         {i["code"]: i["id"] for i in inds.json()},
-        {s["code"]: s["id"] for s in srcs.json()},
+        {s["code"]: (s["id"], s.get("tier")) for s in srcs.json()},
     )
 
 
+# Confiance graduée par tier de source (cf. REVIEW_MODEL.md).
+# Sources d'autorité ingérées par un connecteur DÉTERMINISTE -> publication auto,
+# tracée par `reviewer = auto:<connecteur>` (auditable a posteriori par échantillon).
+# Presse et contributif -> file de revue humaine obligatoire.
+AUTO_PUBLISH_TIERS = {"regulatory", "audited_ngo"}
+
+
+def review_status_for(tier: str | None) -> str:
+    """`approved` pour les tiers 1-2, `pending` sinon (tier inconnu = prudence)."""
+    return "approved" if tier in AUTO_PUBLISH_TIERS else "pending"
+
+
 def insert_evidence(rows: list[EvidenceRow], client: httpx.Client | None = None) -> dict[str, int]:
-    """Insère les evidence en `pending`. Ignore les doublons (idempotent).
+    """Insère les evidence avec un statut dérivé du TIER de la source.
+
+    Tiers 1-2 (regulatory / ONG auditée) : publiés automatiquement, reviewer
+    `auto:<connecteur>`. Tier 3 / crowd : `pending`, revue humaine obligatoire.
 
     Retourne {"inserted": n, "skipped": m} (skipped = doublons ou refs inconnues).
     """
@@ -72,10 +87,16 @@ def insert_evidence(rows: list[EvidenceRow], client: httpx.Client | None = None)
         for row in rows:
             eid = entities.get(row.entity_slug)
             iid = indicators.get(row.indicator_code)
-            sid = sources.get(row.source_code)
-            if not (eid and iid and sid):
+            src = sources.get(row.source_code)
+            if not (eid and iid and src):
                 stats["skipped"] += 1
                 continue
+            sid, tier = src
+            status = review_status_for(tier)
+            # Traçabilité : distinguer une publication automatique d'une validation humaine.
+            reviewer = row.reviewer
+            if status == "approved" and not reviewer.startswith("auto:"):
+                reviewer = f"auto:{reviewer}"
             payload.append({
                 "entity_id": eid,
                 "indicator_id": iid,
@@ -90,8 +111,8 @@ def insert_evidence(rows: list[EvidenceRow], client: httpx.Client | None = None)
                 "confidence": row.confidence,
                 "source_url": row.source_url,
                 "excerpt": row.excerpt,
-                "reviewer": row.reviewer,
-                "review_status": "pending",   # jamais publié sans revue humaine
+                "reviewer": reviewer,
+                "review_status": status,   # dérivé du tier de la source (REVIEW_MODEL.md)
             })
         if not payload:
             return stats

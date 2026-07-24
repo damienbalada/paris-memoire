@@ -77,18 +77,18 @@ humain, ou sans piste d'audit.
 5. **Corroboration (Règle 4)** — une controverse contestée à source unique est
    affichée mais hors calcul tant qu'elle n'est pas corroborée.
 
-## Implications techniques (à implémenter, ≥ v0.5)
+## Implications techniques — ✅ implémenté
 
-Aujourd'hui, `pipeline/.../load.py` insère **tout** en `pending`. La décision
-implique de **dériver `review_status` du tier de la source** à l'ingestion :
+`pipeline/paris_memoire/load.py` **dérive `review_status` du tier de la source**
+à l'ingestion (`review_status_for()`), conformément à la règle ci-dessus :
 
-- connecteurs tier 1-2 → insertion directe en `approved` (reviewer =
-  `auto:<connecteur>`), tracée ;
-- connecteurs/entrées tier 3 & crowd → `pending`, file de revue
-  (`/admin/revue`).
+- tier 1-2 → insertion directe en `approved`, reviewer préfixé **`auto:<connecteur>`** ;
+- tier 3 / crowd / **tier inconnu ou absent** → `pending`, file de revue (`/admin/revue`).
 
-Un `reviewer` distinct (`auto:*` vs humain) permet l'audit par échantillon et la
-distinction claire entre publication automatique et validation humaine.
+Le `reviewer` distinct (`auto:*` vs humain) permet l'audit par échantillon et la
+distinction nette entre publication automatique et validation humaine.
+Verrouillé par `pipeline/tests/test_review_model.py` : ces tests échouent si la
+liste des tiers auto-publiés s'élargit accidentellement (défaut sûr = `pending`).
 
 ## Ce que ce modèle garantit
 

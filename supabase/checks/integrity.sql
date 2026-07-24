@@ -63,6 +63,19 @@ select verif, n from (
     from evidence
    where review_status = 'approved'
      and normalized_value is null and value_numeric is null and value_boolean is null
+  -- ANTI-RÉCIDIVE : aucune donnée de démonstration ne doit être publiée. Une note
+  -- adossée à une preuve inventée ruine la promesse du produit (audit 07/2026 :
+  -- 70 lignes `seed-demo` comptaient dans les scores des plus grandes marques).
+  union all
+  select 'evidence_demo_publiee', count(*)
+    from evidence
+   where review_status = 'approved'
+     and (reviewer ilike '%demo%' or excerpt ilike '%(démo)%' or excerpt ilike '%(demo)%')
+  -- Traçabilité : une preuve publiée doit TOUJOURS être remontable à une source.
+  union all
+  select 'evidence_publiee_sans_url_propre', count(*)
+    from evidence ev join sources s on s.id = ev.source_id
+   where ev.review_status = 'approved' and ev.source_url is null and s.url is null
 ) t
 where n > 0
 order by verif;
