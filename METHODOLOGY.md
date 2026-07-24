@@ -21,6 +21,14 @@ tech, automobile, restauration, énergie, banque** (France + international).
    sa date d'observation. La fiche affiche la **dernière mise à jour** de
    l'entité, et toute preuve de **plus de 3 ans** porte un badge « donnée
    ancienne » (rappel qu'elle expirera à 5 ans).
+
+   **`observed_on` = date de VÉRIFICATION, pas date de l'événement.** Distinction
+   essentielle pour les faits *structurels* toujours valables (une loi en vigueur,
+   une interdiction permanente) : les dater de leur promulgation les ferait
+   expirer à tort. On les date du jour où l'on a constaté qu'ils s'appliquent
+   toujours, et l'`excerpt` mentionne la date d'origine. *(Corrigé en 07/2026 :
+   19 entités françaises perdaient à tort le fait « financement politique
+   interdit — loi de 1995 », pourtant toujours en vigueur.)*
 4. **Faits séparés des jugements.** On stocke des indicateurs factuels
    normalisés ; la pondération est appliquée *après*, via des profils de valeurs
    configurables. Pas de score « one-size-fits-all ».

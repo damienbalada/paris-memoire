@@ -193,18 +193,23 @@ export function CompanyScore({
 function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, string> }) {
   const covered = d.indicators.filter((i) => i.covered);
   return (
-    <div className="panel">
-      <div className="row between wrap" style={{ gap: 6 }}>
-        <div className="row" style={{ gap: 10 }}>
-          <div className={`grade sm grade-${d.grade}`}>{d.grade}</div>
-          <strong>{d.name}</strong>
+    <details className="pillar-card">
+      <summary>
+        <div className={`grade sm grade-${d.grade}`}>{d.grade}</div>
+        <div className="pillar-name">
+          {d.name}
+          <small>
+            fiabilité {pct(d.confidence)} · {d.covered_indicators}/{d.applicable_indicators} indicateurs
+          </small>
         </div>
-        <span className="muted small">
-          fiabilité {pct(d.confidence)} · {d.covered_indicators}/{d.applicable_indicators} indicateurs
+        <span className="pillar-score">
+          {Math.round(d.score * 100)}<span>/100</span>
         </span>
-      </div>
+        <span className="chev" aria-hidden="true">›</span>
+      </summary>
 
-      <div className="row" style={{ margin: "10px 0 2px" }}>
+      <div className="pillar-body">
+      <div className="row" style={{ margin: "2px 0 2px" }}>
         <div className="bar">
           <span style={{ width: pct(d.score), background: gradeColor[d.grade] }} />
         </div>
@@ -256,6 +261,7 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </details>
   );
 }
