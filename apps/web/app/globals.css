@@ -74,10 +74,16 @@ h1, h2, h3 { margin: 0 0 8px; line-height: 1.2; }
 .bar { height: 10px; background: var(--panel-3); border-radius: 99px; overflow: hidden; flex: 1; }
 .bar > span { display: block; height: 100%; border-radius: 99px; }
 
+/* Fiche entreprise : l'espacement vertical est porté par le CONTENEUR (gap), pas
+   par des marges entre voisins. Des règles du type `.panel + .panel` laissaient
+   sans marge les transitions panneau↔pilier, d'où des écarts irréguliers. */
+.fiche-stack { display: flex; flex-direction: column; gap: 12px; }
+.fiche-stack > .panel + .panel,
+.fiche-stack > .pillar-card + .pillar-card { margin-top: 0; }
+
 /* Pilier : carte dépliable (résumé toujours visible, preuves à la demande) */
 .pillar-card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
   overflow: hidden; }
-.pillar-card + .pillar-card { margin-top: 8px; }
 .pillar-card[open] { border-color: var(--border-strong); }
 .pillar-card > summary { list-style: none; cursor: pointer; display: grid;
   grid-template-columns: 34px 1fr 14px; gap: 12px; align-items: center; padding: 14px 15px; }

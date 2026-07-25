@@ -68,11 +68,11 @@ export function CompanyScore({
   const notApplicable = (payload.dimensions ?? []).filter((d) => !applicableDims.has(d.code));
 
   return (
-    <main>
+    <main className="fiche-stack">
       <a className="muted small" href="/">← toutes les entreprises</a>
 
       {/* En-tête : note ET fiabilité, séparées */}
-      <div className="panel" style={{ marginTop: 12 }}>
+      <div className="panel">
         <div className="row between wrap">
           <div>
             <h1 style={{ marginBottom: 2 }}>{payload.entity.name}</h1>
@@ -183,7 +183,7 @@ export function CompanyScore({
         </div>
       )}
 
-      <p className="muted small" style={{ marginTop: 20 }}>
+      <p className="muted small" style={{ marginTop: 8 }}>
         Pondération : <strong>{payload.profile.name}</strong>. Méthodologie publique et versionnée.
       </p>
     </main>
