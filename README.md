@@ -1,6 +1,6 @@
 # DIAMS
 
-> **DIAMS** — **D**iagnostic **I**ndépendant, **A**uditable et **M**ulti-critères des **S**ociétés.
+> **DIAMS** — **D**ocumented, **I**ndependent, **A**uditable, **M**ulti-criteria **S**coring.
 
 Moteur de notation **éthique** des entreprises, multi-critères et **traçable** —
 un « B Corp élargi » couvrant environnement, travail/rémunération, chaîne

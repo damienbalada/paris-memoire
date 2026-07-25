@@ -2,10 +2,10 @@
 // Ne pas éditer à la main : régénérer via `node scripts/gen-methodology.mjs`.
 export const METHODOLOGY_MD = `# Méthodologie — DIAMS
 
-> **DIAMS** — **D**iagnostic **I**ndépendant, **A**uditable et **M**ulti-critères
-> des **S**ociétés. Score éthique d'entreprise, multi-critères, **traçable** :
-> chaque point de note renvoie à une preuve sourcée et datée. La méthodo est
-> publique et versionnée : c'est la condition de la confiance.
+> **DIAMS** — **D**ocumented, **I**ndependent, **A**uditable, **M**ulti-criteria
+> **S**coring. Score éthique multi-critères et **traçable** : chaque point de note
+> renvoie à une preuve sourcée et datée. La méthodo est publique et versionnée :
+> c'est la condition de la confiance.
 
 Version : \`0.4.0\` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
@@ -23,6 +23,14 @@ tech, automobile, restauration, énergie, banque** (France + international).
    sa date d'observation. La fiche affiche la **dernière mise à jour** de
    l'entité, et toute preuve de **plus de 3 ans** porte un badge « donnée
    ancienne » (rappel qu'elle expirera à 5 ans).
+
+   **\`observed_on\` = date de VÉRIFICATION, pas date de l'événement.** Distinction
+   essentielle pour les faits *structurels* toujours valables (une loi en vigueur,
+   une interdiction permanente) : les dater de leur promulgation les ferait
+   expirer à tort. On les date du jour où l'on a constaté qu'ils s'appliquent
+   toujours, et l'\`excerpt\` mentionne la date d'origine. *(Corrigé en 07/2026 :
+   19 entités françaises perdaient à tort le fait « financement politique
+   interdit — loi de 1995 », pourtant toujours en vigueur.)*
 4. **Faits séparés des jugements.** On stocke des indicateurs factuels
    normalisés ; la pondération est appliquée *après*, via des profils de valeurs
    configurables. Pas de score « one-size-fits-all ».

@@ -1,6 +1,6 @@
 # Feuille de route — DIAMS
 
-> **DIAMS** — Diagnostic Indépendant, Auditable et Multi-critères des Sociétés.
+> **DIAMS** — Documented, Independent, Auditable, Multi-criteria Scoring.
 > Ambition : un outil de référence **mondial**, utilisable par tous, où chaque
 > point de note est traçable jusqu'à une source publique, datée et vérifiable.
 

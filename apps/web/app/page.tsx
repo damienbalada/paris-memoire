@@ -42,8 +42,8 @@ export default async function HomePage() {
       <div>
         <h1 style={{ marginBottom: 8 }}>DIAMS — score éthique des marques</h1>
         <p className="muted" style={{ margin: 0 }}>
-          <strong>D</strong>iagnostic <strong>I</strong>ndépendant, <strong>A</strong>uditable et{" "}
-          <strong>M</strong>ulti-critères des <strong>S</strong>ociétés. Une note par dimension, un
+          <strong>D</strong>ocumented, <strong>I</strong>ndependent, <strong>A</strong>uditable,{" "}
+          <strong>M</strong>ulti-criteria <strong>S</strong>coring. Une note par dimension, un
           indice de fiabilité affiché à part, et chaque point traçable jusqu'à sa source datée.
         </p>
         <div className="row wrap" style={{ gap: 10, marginTop: 16 }}>

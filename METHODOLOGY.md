@@ -1,9 +1,9 @@
 # Méthodologie — DIAMS
 
-> **DIAMS** — **D**iagnostic **I**ndépendant, **A**uditable et **M**ulti-critères
-> des **S**ociétés. Score éthique d'entreprise, multi-critères, **traçable** :
-> chaque point de note renvoie à une preuve sourcée et datée. La méthodo est
-> publique et versionnée : c'est la condition de la confiance.
+> **DIAMS** — **D**ocumented, **I**ndependent, **A**uditable, **M**ulti-criteria
+> **S**coring. Score éthique multi-critères et **traçable** : chaque point de note
+> renvoie à une preuve sourcée et datée. La méthodo est publique et versionnée :
+> c'est la condition de la confiance.
 
 Version : `0.4.0` — périmètre : **Luxe/Mode, agroalimentaire/FMCG, hygiène-beauté,
 tech, automobile, restauration, énergie, banque** (France + international).
