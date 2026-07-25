@@ -202,9 +202,6 @@ function DimensionPanel({ d, names }: { d: DimensionResult; names: Map<string, s
             fiabilité {pct(d.confidence)} · {d.covered_indicators}/{d.applicable_indicators} indicateurs
           </small>
         </div>
-        <span className="pillar-score">
-          {Math.round(d.score * 100)}<span>/100</span>
-        </span>
         <span className="chev" aria-hidden="true">›</span>
       </summary>
 

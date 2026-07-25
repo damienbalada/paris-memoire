@@ -80,26 +80,19 @@ h1, h2, h3 { margin: 0 0 8px; line-height: 1.2; }
 .pillar-card + .pillar-card { margin-top: 8px; }
 .pillar-card[open] { border-color: var(--border-strong); }
 .pillar-card > summary { list-style: none; cursor: pointer; display: grid;
-  grid-template-columns: 34px 1fr auto 14px; gap: 12px; align-items: center; padding: 14px 15px; }
+  grid-template-columns: 34px 1fr 14px; gap: 12px; align-items: center; padding: 14px 15px; }
 .pillar-card > summary::-webkit-details-marker { display: none; }
-.pillar-card > summary:hover { background: var(--panel-2); }
+/* `hover: hover` uniquement : sur mobile un tap laisse sinon l'état hover
+   collé, et la carte touchée garde un fond différent des autres. */
+@media (hover: hover) {
+  .pillar-card > summary:hover { background: var(--panel-2); }
+}
 .pillar-name { font-size: 14.5px; font-weight: 650; line-height: 1.3; }
 .pillar-name small { display: block; font-size: 11.5px; color: var(--muted); font-weight: 400; margin-top: 3px; }
-.pillar-score { font-variant-numeric: tabular-nums; font-size: 26px; font-weight: 800; letter-spacing: -.03em; }
-.pillar-score > span { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: 0; }
 .chev { color: var(--faint); font-size: 16px; justify-self: end; transition: transform .2s; }
 .pillar-card[open] .chev { transform: rotate(90deg); }
 .pillar-body { padding: 0 15px 14px; }
 @media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
-/* Sur mobile : la note passe sous le nom plutôt que de comprimer la ligne */
-@media (max-width: 480px) {
-  .pillar-card > summary { grid-template-columns: 34px 1fr 14px;
-    grid-template-areas: "g nm chev" ". sc sc"; row-gap: 6px; }
-  .pillar-card > summary > .grade { grid-area: g; }
-  .pillar-name { grid-area: nm; }
-  .pillar-score { grid-area: sc; }
-  .chev { grid-area: chev; }
-}
 
 .badge { font-size: 11px; padding: 2px 7px; border-radius: 99px; border: 1px solid var(--border);
   color: var(--muted); white-space: nowrap; }
