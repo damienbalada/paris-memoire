@@ -120,7 +120,7 @@ export default async function CivicPage() {
     return (
       <main>
         <a className="muted small" href="/">← accueil</a>
-        <div className="panel" style={{ marginTop: 12, borderColor: "#6b2222" }}>
+        <div className="panel" style={{ marginTop: 16, borderColor: "#c1453c" }}>
           <strong>Erreur de chargement.</strong>
           <p className="muted small">{(e as Error).message}</p>
         </div>
@@ -152,7 +152,7 @@ export default async function CivicPage() {
     <main>
       <a className="muted small" href="/">← accueil</a>
 
-      <div className="panel" style={{ marginTop: 12 }}>
+      <div className="panel" style={{ marginTop: 16 }}>
         <h1 style={{ marginBottom: 4 }}>DIAMS Civique</h1>
         <p className="muted small" style={{ marginBottom: 8 }}>
           Comment les groupes politiques ont voté sur les grands textes rattachés à chaque pilier DIAMS.
@@ -166,10 +166,10 @@ export default async function CivicPage() {
       </div>
 
       {[...byPillar.entries()].map(([pillar, votes]) => (
-        <section key={pillar} style={{ marginTop: 18 }}>
-          <h2 style={{ fontSize: 18, marginBottom: 8 }}>{pillarName[pillar] ?? pillar}</h2>
+        <section key={pillar} style={{ marginTop: 26 }}>
+          <h2 style={{ fontSize: 18, marginBottom: 10 }}>{pillarName[pillar] ?? pillar}</h2>
           {byChamber(votes).map(([chamber, cvotes]) => (
-            <div key={chamber} style={{ marginBottom: 8 }}>
+            <div key={chamber} style={{ marginBottom: 14 }}>
               <div className="muted small" style={{ margin: "6px 2px 8px", fontWeight: 600 }}>
                 {chamberName[chamber] ?? chamber}
               </div>

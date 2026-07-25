@@ -1,24 +1,8 @@
-/* Thème sombre par défaut ; le thème clair s'active via [data-theme="light"]
-   (bascule côté client, préférence mémorisée). Palette « pop » : accent violet
-   électrique + échelle de notes vive. La lettre double toujours la couleur,
-   donc l'information n'est jamais portée par la couleur seule. */
+/* Thème clair unique (pas de bascule : un seul rendu, cohérent partout).
+   Palette « pop » : accent violet électrique + échelle de notes vive. La lettre
+   double toujours la couleur, donc l'information n'est jamais portée par la
+   couleur seule (lisible en vision des couleurs atypique). */
 :root {
-  --bg: #0b0b12;
-  --panel: #15131f;
-  --panel-2: #1d1a2b;
-  --panel-3: #272338;
-  --border: #252132;
-  --border-strong: #352f4a;
-  --text: #f3f0ff;
-  --muted: #a29dbf;
-  --faint: #6f6890;
-  --accent: #9d7bff;
-  --accent-ink: #0b0b12;
-  --a: #1fd587; --b: #a6e635; --c: #ffc933; --d: #ff824d; --e: #ff5580;
-  /* Module civique : encres neutres (aucune connotation morale/partisane) */
-  --civ-data: #c8ced7; --civ-abstain: #454c57;
-}
-:root[data-theme="light"] {
   --bg: #f3f2fb;
   --panel: #ffffff;
   --panel-2: #f0eefb;
@@ -31,7 +15,9 @@
   --accent: #6c3bff;
   --accent-ink: #ffffff;
   --a: #08b56b; --b: #8fd117; --c: #ffb300; --d: #ff6a2c; --e: #ff2d68;
-  --civ-data: #4a4a55; --civ-abstain: #c9c6d6;
+  /* Module civique : encres de la palette DIAMS, sans valence morale
+     (cf. commentaire détaillé plus bas, section « Module civique »). */
+  --civ-data: #6c3bff; --civ-abstain: #d6d0ee;
 }
 * { box-sizing: border-box; }
 html, body { padding: 0; margin: 0; background: var(--bg); color: var(--text);
@@ -53,16 +39,6 @@ h1, h2, h3 { margin: 0 0 8px; line-height: 1.2; }
   font-weight: 900; font-size: 30px; color: #0b0b12; letter-spacing: -.02em; }
 .grade.sm { width: 34px; height: 34px; font-size: 17px; border-radius: 10px; font-weight: 850; }
 
-/* Bascule de thème */
-.theme-toggle { display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
-  background: var(--panel-2); border: 1px solid var(--border-strong); border-radius: 99px;
-  padding: 5px 8px; color: var(--muted); font-size: 13px; }
-.theme-toggle:hover { border-color: var(--accent); }
-.theme-toggle .knob { width: 34px; height: 19px; border-radius: 99px; background: var(--panel-3);
-  position: relative; display: inline-block; }
-.theme-toggle .knob::after { content: ""; position: absolute; top: 2px; left: 2px; width: 15px; height: 15px;
-  border-radius: 50%; background: var(--accent); transition: transform .22s cubic-bezier(.4,1.3,.5,1); }
-:root[data-theme="light"] .theme-toggle .knob::after { transform: translateX(15px); }
 .grade-A { background: var(--a); } .grade-B { background: var(--b); }
 .grade-C { background: var(--c); } .grade-D { background: var(--d); } .grade-E { background: var(--e); }
 
@@ -100,15 +76,17 @@ h1, h2, h3 { margin: 0 0 8px; line-height: 1.2; }
 .pillar-body { padding: 0 15px 14px; }
 @media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
 
-.badge { font-size: 11px; padding: 2px 7px; border-radius: 99px; border: 1px solid var(--border);
-  color: var(--muted); white-space: nowrap; }
-.badge.warn { color: #ffd9a0; border-color: #6b4b18; background: #2a1f10; }
-.badge.cap { color: #ffb4b4; border-color: #6b2222; background: #2a1414; }
+.badge { font-size: 11px; padding: 2px 7px; border-radius: 99px; border: 1px solid var(--border-strong);
+  color: var(--muted); white-space: nowrap; background: var(--panel-2); }
+/* Calibrés pour fond clair (contraste suffisant sur blanc). */
+.badge.warn { color: #8a5300; border-color: #f0d9a8; background: #fdf4e3; }
+.badge.cap { color: #a3122f; border-color: #f6c6cf; background: #fdeef1; }
 
-.tier-regulatory { color: #7ee787; }
-.tier-audited_ngo { color: #79c0ff; }
-.tier-press { color: #d2a8ff; }
-.tier-crowd { color: #ff9b9b; }
+/* Tiers de source : teintes lisibles sur fond clair. */
+.tier-regulatory { color: #067a4c; }
+.tier-audited_ngo { color: #1d5fd0; }
+.tier-press { color: #7a3bd0; }
+.tier-crowd { color: #b23b3b; }
 
 .evidence { border-top: 1px solid var(--border); padding: 10px 0; }
 .evidence:last-child { padding-bottom: 0; }
@@ -122,34 +100,52 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
   border-radius: 10px; padding: 10px 12px; margin: 0 8px 8px 0; }
 .chip-link:hover { border-color: var(--accent); }
 
-/* Module civique : barre divergente neutre (option A — gris + texture) */
+/* Listes d'entités (accueil) : une entité par ligne, note lettrée en repère. */
+.list-title { font-size: 15px; font-weight: 750; margin: 0 2px 10px;
+  display: flex; align-items: baseline; gap: 8px; }
+.list-title > span { font-family: var(--mono, ui-monospace), monospace; font-size: 12px; font-weight: 500; }
+.ent-list { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.ent-row { display: grid; grid-template-columns: 34px 1fr 14px; gap: 12px; align-items: center;
+  padding: 11px 15px; }
+.ent-row + .ent-row { border-top: 1px solid var(--border); }
+@media (hover: hover) { .ent-row:hover { background: var(--panel-2); } }
+.ent-name { font-size: 14.5px; font-weight: 600; }
+.grade-none { background: var(--panel-3); color: var(--faint); }
+
+/* ── Module civique ──────────────────────────────────────────────────────────
+   Harmonisé avec la palette DIAMS (accent violet, mêmes surfaces et rayons).
+   ⚠️ On n'utilise VOLONTAIREMENT PAS l'échelle de notes A→E (vert=bien /
+   rouge=mal) pour « pour » et « contre » : ce serait décréter qu'un vote est bon
+   ou mauvais, alors que la page affirme ne pas prendre parti. Le sens est porté
+   par la DIRECTION de la barre (← contre · pour →) et par la TEXTURE, jamais par
+   une couleur morale. */
 .civ-chart { display: flex; flex-direction: column; gap: 7px; margin-top: 10px; }
 .civ-row { display: grid; grid-template-columns: 74px 1fr 56px; align-items: center; gap: 8px; }
 .civ-label { font-size: 11px; color: var(--muted); text-align: right; white-space: nowrap; }
 .civ-track { display: grid; grid-template-columns: 1fr 1fr; height: 15px; position: relative; }
 .civ-track::before { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px;
-  width: 1.5px; background: var(--border); transform: translateX(-50%); z-index: 0; }
+  width: 1.5px; background: var(--border-strong); transform: translateX(-50%); z-index: 0; }
 .civ-side { display: flex; align-items: center; height: 100%; }
 .civ-side.l { justify-content: flex-end; }
 .civ-side.r { justify-content: flex-start; }
-.civ-bar { height: 100%; border-radius: 2px; }
+.civ-bar { height: 100%; border-radius: 3px; }
 .civ-bar.pour { background: var(--civ-data); }
 .civ-bar.contre { background: var(--civ-data);
   background-image: repeating-linear-gradient(135deg, transparent 0 3px, rgba(0,0,0,.5) 3px 5px); }
 .civ-abst { position: absolute; left: 50%; top: 0; height: 100%; transform: translateX(-50%);
-  background: var(--civ-abstain); border: 1px solid var(--border); border-radius: 2px;
+  background: var(--civ-abstain); border: 1px solid var(--border-strong); border-radius: 3px;
   box-sizing: border-box; z-index: 1; }
 .civ-num { font-size: 10.5px; color: var(--muted); text-align: left; }
 .civ-row.sum .civ-label { color: var(--text); font-weight: 650; }
 .civ-row.sum { border-bottom: 1px dashed var(--border); padding-bottom: 6px; margin-bottom: 2px; }
 .civ-legend { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 12px; padding-top: 10px;
   border-top: 1px dashed var(--border); font-size: 12px; color: var(--muted); }
-.civ-sw { width: 20px; height: 11px; border-radius: 2px; display: inline-block;
+.civ-sw { width: 20px; height: 11px; border-radius: 3px; display: inline-block;
   vertical-align: middle; margin-right: 6px; }
 .civ-sw.pour { background: var(--civ-data); }
 .civ-sw.contre { background: var(--civ-data);
   background-image: repeating-linear-gradient(135deg, transparent 0 3px, rgba(0,0,0,.5) 3px 5px); }
-.civ-sw.abst { background: var(--civ-abstain); border: 1px solid var(--border); box-sizing: border-box; }
+.civ-sw.abst { background: var(--civ-abstain); border: 1px solid var(--border-strong); box-sizing: border-box; }
 
 /* --- Adaptations mobile ---------------------------------------------------- */
 @media (max-width: 560px) {
