@@ -94,7 +94,32 @@ Objectif : ne manquer **aucune controverse documentée** (travail forcé, pollut
 
 ## Axe D — Accessibilité mondiale (produit)
 
-- **Internationalisation** (i18n) : interface multilingue (FR/EN d'abord).
+### Langue : FR aujourd'hui → EN à terme (décidé)
+
+**Aujourd'hui : interface en français.** Cohérent avec les sources actuelles,
+massivement françaises (Égapro, HATVP, plans de vigilance, Assemblée nationale,
+loi de 1995) et avec le public de départ.
+
+**À terme : bascule en anglais**, pilotée par un déclencheur clair — **le
+périmètre des sources**. Quand elles deviennent européennes (Axe A1 : CSRD, CbCR)
+puis mondiales (Axe A2-A3 : SEC, UK, Japon…), le français devient un plafond :
+il exclut la majorité des utilisateurs comme des contributeurs de la revue
+(Axe C). L'anglais devient alors la langue par défaut, le français une locale.
+
+Séquence : **FR seul** → **FR + EN** (le temps de la transition européenne) →
+**EN par défaut** + locales.
+
+Déjà acquis : la glose de l'acronyme est **déjà en anglais** (*Documented,
+Independent, Auditable, Multi-criteria Scoring*) et DIAMS se lit à l'identique
+dans les deux langues — la bascule ne coûtera aucun rebranding.
+
+Reste à faire, le jour J : extraire les libellés dans des fichiers de traduction
+(aucune chaîne en dur), traduire `METHODOLOGY.md` (le plus gros volume), et
+décider du sort des `excerpt` d'evidence — rédigés en français aujourd'hui, et
+qui ne sont pas de l'interface mais de la **donnée** (donc à traiter par langue
+de source, pas par simple traduction).
+
+- **Internationalisation** (i18n) : extraction des libellés, FR + EN d'abord.
 - **Recherche** d'une marque par nom / code-barres (scan en magasin).
 - **API publique** ouverte (la traçabilité est un argument de confiance).
 - **Accessibilité** (a11y) et mobile-first (déjà entamé).
