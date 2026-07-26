@@ -118,6 +118,42 @@ insuffisantes », sans note ni rang. On ne veut pas qu'une note basse *faute de
 preuves* soit lue comme un mauvais résultat. Note, fiabilité et fraîcheur sont
 les **trois axes de confiance** affichés séparément.
 
+### Règle 6 — Comparaison à périmètre égal (alternatives)
+
+Chaque fiche propose les entités **mieux notées** du même secteur. Trois bornes,
+parce qu'une suggestion est un acte plus engageant qu'une note :
+
+1. **Même secteur, même nature.** Les indicateurs applicables varient d'un
+   secteur à l'autre (§ 4, pertinence sectorielle) : deux notes issues de
+   périmètres différents ne mesurent pas la même chose. Et un *groupe* n'est pas
+   une alternative d'achat à une *marque*.
+2. **Jamais de suggestion non publiable.** Une entité sous le seuil de la
+   Règle 5 est écartée. Recommander une marque sur laquelle on n'a presque rien
+   reviendrait à récompenser l'absence de données — le travers exact des
+   comparateurs qui font passer l'opacité pour une vertu.
+3. **Fiabilité de l'alternative affichée**, et **appartenance au même groupe
+   propriétaire signalée** : changer de marque au sein d'un même groupe ne change
+   pas le destinataire de l'argent.
+
+L'écart est exprimé en **points de note**, comme un fait de comparaison — sans
+couleur de jugement (§ 1, neutralité).
+
+### Règle 7 — Un signalement n'est pas une preuve
+
+Les fiches acceptent des **signalements** de lecteurs (donnée manquante, donnée
+fausse, lien mort). Un signalement :
+
+- **n'entre dans aucun calcul**, jamais, à aucun poids ;
+- ouvre une **revue humaine** (\`/admin/corrections\`) ;
+- s'il est fondé, doit être **converti en \`evidence\`** avec sa propre source et
+  son propre tier. La parole d'un lecteur, seule, vaut \`crowd\` (0,30) : c'est une
+  piste, pas une preuve.
+
+La note ne bouge donc **jamais** du fait d'un signalement — seulement du fait de
+l'evidence sourcée qu'il a permis de créer. C'est la contribution ouverte sans
+la vulnérabilité du vote : le nombre de personnes qui affirment une chose ne
+change pas sa véracité.
+
 ---
 
 ## 3. Du fait au score (pipeline de calcul)

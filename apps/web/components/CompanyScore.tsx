@@ -1,5 +1,6 @@
 import { computeScore, type DimensionResult, type ScoreResult } from "@/lib/scoring";
-import type { ScorePayload } from "@/lib/data";
+import type { Alternative, ScorePayload } from "@/lib/data";
+import { CorrectionForm } from "@/components/CorrectionForm";
 
 const gradeColor: Record<string, string> = {
   A: "var(--a)", B: "var(--b)", C: "var(--c)", D: "var(--d)", E: "var(--e)",
@@ -27,9 +28,11 @@ const capReason: Record<string, string> = {
 export function CompanyScore({
   payload,
   group = null,
+  alternatives = [],
 }: {
   payload: ScorePayload;
   group?: { name: string; result: ScoreResult } | null;
+  alternatives?: Alternative[];
 }) {
   // Pondération fixe : profil renvoyé par la base (défaut « Équilibré »).
   const result = computeScore(payload);
@@ -173,6 +176,18 @@ export function CompanyScore({
         <DimensionPanel key={d.dimension_code} d={d} names={indicatorNames} />
       ))}
 
+      {/* Mieux notées dans le même secteur */}
+      {alternatives.length > 0 && <Alternatives items={alternatives} />}
+
+      {/* Boucle de contribution : signaler une erreur / une donnée manquante */}
+      <CorrectionForm
+        entitySlug={payload.entity.slug}
+        indicators={payload.applicableIndicators.map((i) => ({
+          code: i.code,
+          name: i.name ?? i.code,
+        }))}
+      />
+
       {/* Piliers non pertinents pour le secteur (exclus du calcul, pas pénalisés) */}
       {notApplicable.length > 0 && (
         <div className="panel" style={{ borderStyle: "dashed" }}>
@@ -187,6 +202,42 @@ export function CompanyScore({
         Pondération : <strong>{payload.profile.name}</strong>. Méthodologie publique et versionnée.
       </p>
     </main>
+  );
+}
+
+/**
+ * Alternatives mieux notées du même secteur. Deux règles d'affichage tiennent la
+ * promesse de neutralité :
+ *  - la **fiabilité de l'alternative** est montrée, pas seulement sa note : une
+ *    meilleure note mal documentée n'est pas un meilleur choix démontré ;
+ *  - une alternative du **même groupe propriétaire** est signalée, parce que
+ *    changer de marque n'y change pas le destinataire de l'argent.
+ */
+function Alternatives({ items }: { items: Alternative[] }) {
+  return (
+    <section className="panel">
+      <h2 style={{ margin: "0 0 2px", fontSize: 17 }}>Mieux notées dans le même secteur</h2>
+      <p className="muted small" style={{ margin: "0 0 12px" }}>
+        Comparaison à périmètre égal (même secteur, mêmes indicateurs applicables).
+        Les entités sous le seuil de fiabilité sont écartées : une absence de données
+        n'est pas une vertu.
+      </p>
+      <div className="alt-list">
+        {items.map((a) => (
+          <a key={a.slug} className="alt-row" href={`/entreprise/${a.slug}`}>
+            <span className={`grade sm grade-${a.grade}`}>{a.grade}</span>
+            <span className="alt-main">
+              <span className="alt-name">{a.name}</span>
+              <small className="muted">
+                {pct(a.score)} · fiabilité {pct(a.confidence)}
+                {a.same_group && " · même groupe propriétaire"}
+              </small>
+            </span>
+            <span className="alt-delta">+{Math.round(a.delta * 100)} pts</span>
+          </a>
+        ))}
+      </div>
+    </section>
   );
 }
 

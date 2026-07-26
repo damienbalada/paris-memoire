@@ -38,7 +38,10 @@ export default async function ReviewQueuePage() {
     <main>
       <div className="row between">
         <h1>File de revue</h1>
-        <span className="badge">{pending.length} en attente</span>
+        <span className="row" style={{ gap: 10 }}>
+          <a className="muted small" href="/admin/corrections">signalements des lecteurs →</a>
+          <span className="badge">{pending.length} en attente</span>
+        </span>
       </div>
       <p className="muted small">
         Chaque evidence importée par le pipeline doit être validée ici avant de

@@ -32,6 +32,8 @@ Deux natures de sources, deux régimes de coût :
   Gouvernance, Fiscalité, Benchmarks (BBFAW/KnowTheChain/FTI), BFFP, Finance
   éthique, HATVP, Yale. + résolution GLEIF/SIRENE, univers OFF/Wikidata.
 - Indice de fiabilité affiché séparément ; distinction non-applicable / sans-donnée / controverse hors-note.
+- **Alternatives mieux notées** par fiche (même secteur, même nature, jamais une
+  entité non publiable) et **signalements** de lecteurs hors calcul (Règles 6 et 7).
 - Curation manuelle sourcée en cours (CDP, sanctions, controverses) — mais **plafonne** (données derrière paywall, presse inégale).
 
 **Limite structurelle identifiée :** la curation manuelle ne passe pas à
@@ -89,6 +91,14 @@ Objectif : ne manquer **aucune controverse documentée** (travail forcé, pollut
    (regulatory + ONG auditée, connecteurs déterministes) ; revue humaine
    concentrée sur les tiers 3/crowd (presse, contributif). La revue ne croît
    qu'avec le volume presse/crowd, pas avec le volume total.
+4. **Contribution par le bas — amorcée** : formulaire de signalement sur chaque
+   fiche → file `/admin/corrections`. Un signalement n'entre dans aucun calcul
+   (Règle 7) ; il ne fait qu'ouvrir une revue. Le volume ne fait pas la vérité.
+5. **Limite de calcul à lever** : les notes sont recalculées à chaque affichage
+   (un appel `compute_score_input` par entité). Tenable à ~200 entités, pas à
+   l'échelle du million : il faudra **matérialiser les scores** en base, avec
+   invalidation sur écriture d'evidence. C'est aujourd'hui le bloc le plus
+   sensible au volume, avant même le coût d'ingestion.
 
 ---
 

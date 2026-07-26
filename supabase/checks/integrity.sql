@@ -76,6 +76,14 @@ select verif, n from (
   select 'evidence_publiee_sans_url_propre', count(*)
     from evidence ev join sources s on s.id = ev.source_id
    where ev.review_status = 'approved' and ev.source_url is null and s.url is null
+  -- INVARIANT DE SÉCURITÉ : la file de signalements publics reste fermée aux clés
+  -- `anon`/`authenticated`. L'écriture passe par une Server Action (service_role),
+  -- donc AUCUNE policy ne doit exister sur `corrections` : en ajouter une
+  -- exposerait des signalements non modérés en lecture publique, ou ouvrirait la
+  -- table à l'écriture directe depuis le navigateur.
+  union all
+  select 'corrections_policy_inattendue', count(*)
+    from pg_policies where schemaname = 'public' and tablename = 'corrections'
 ) t
 where n > 0
 order by verif;

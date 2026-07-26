@@ -1,4 +1,4 @@
-import { getScorePayload, getOwnerGroup } from "@/lib/data";
+import { getScorePayload, getOwnerGroup, getAlternatives, type Alternative } from "@/lib/data";
 import { computeScore } from "@/lib/scoring";
 import { CompanyScore } from "@/components/CompanyScore";
 
@@ -22,6 +22,8 @@ export default async function CompanyPage({
       );
     }
 
+    const result = computeScore(payload);
+
     // Groupe propriétaire (le vrai bénéficiaire économique) : on calcule aussi
     // sa note pour l'afficher en regard de celle de la marque.
     let group: { name: string; result: ReturnType<typeof computeScore> } | null = null;
@@ -35,7 +37,16 @@ export default async function CompanyPage({
       // encart groupe optionnel : on ignore les erreurs
     }
 
-    return <CompanyScore payload={payload} group={group} />;
+    // Alternatives mieux notées du même secteur. Bloc optionnel : une erreur ici
+    // ne doit jamais empêcher l'affichage de la note.
+    let alternatives: Alternative[] = [];
+    try {
+      alternatives = await getAlternatives(slug, result.score);
+    } catch {
+      // ignoré
+    }
+
+    return <CompanyScore payload={payload} group={group} alternatives={alternatives} />;
   } catch (e) {
     return (
       <main>

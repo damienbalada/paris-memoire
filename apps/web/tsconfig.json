@@ -11,6 +11,9 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    // Les tests s'exécutent via `node --test --experimental-strip-types`, qui
+    // exige l'extension explicite dans les imports (`./corrections.ts`).
+    "allowImportingTsExtensions": true,
     "jsx": "preserve",
     "incremental": true,
     "plugins": [{ "name": "next" }],

@@ -1,5 +1,13 @@
 import { getSupabase } from "./supabase";
 import { computeScore, type ScoreInput } from "./scoring";
+import {
+  pickComparable,
+  selectAlternatives,
+  type Alternative,
+  type ScoredCandidate,
+} from "./alternatives";
+
+export type { Alternative } from "./alternatives";
 
 export interface ScorePayload extends ScoreInput {
   entity: { slug: string; name: string; sector_id: string | null };
@@ -75,12 +83,49 @@ export async function listEntities() {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("entities")
-    .select("slug, display_name, legal_name, is_brand, parent_id")
+    .select("slug, display_name, legal_name, is_brand, parent_id, sector_id")
     .order("is_brand")
     .order("display_name");
   if (error) throw new Error(error.message);
   return data ?? [];
 }
+
+// --- Index de propriété (chargé une fois, réutilisé) -------------------------
+
+interface EntityRow {
+  id: string;
+  slug: string;
+  display_name: string | null;
+  legal_name: string;
+  is_brand: boolean;
+  parent_id: string | null;
+  sector_id: string | null;
+}
+
+/**
+ * Charge la table `entities` une fois et expose la résolution de propriété.
+ * Évite de refaire la requête complète pour chaque remontée de chaîne.
+ */
+async function loadEntityIndex() {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("entities")
+    .select("id, slug, display_name, legal_name, is_brand, parent_id, sector_id");
+  if (error || !data) return null;
+  const rows = data as EntityRow[];
+  const byId = new Map(rows.map((e) => [e.id, e]));
+  const bySlug = new Map(rows.map((e) => [e.slug, e]));
+  /** Remonte jusqu'au groupe racine (peut être l'entité elle-même). */
+  const rootOf = (slug: string): EntityRow | null => {
+    let cur = bySlug.get(slug) ?? null;
+    if (!cur) return null;
+    while (cur.parent_id && byId.get(cur.parent_id)) cur = byId.get(cur.parent_id)!;
+    return cur;
+  };
+  return { rows, bySlug, rootOf };
+}
+
+const entityName = (e: EntityRow) => e.display_name ?? e.legal_name;
 
 // --- Module civique : cartographie des votes des groupes politiques ----------
 
@@ -151,16 +196,62 @@ export async function getCivicData(): Promise<{ groups: CivicGroup[]; votes: Civ
  * économique). Renvoie null si l'entité est elle-même la racine.
  */
 export async function getOwnerGroup(slug: string): Promise<{ slug: string; name: string } | null> {
-  const supabase = getSupabase();
-  const { data, error } = await supabase
-    .from("entities")
-    .select("id, slug, display_name, legal_name, parent_id");
-  if (error || !data) return null;
-  const byId = new Map<string, any>(data.map((e: any) => [e.id, e]));
-  const bySlug = new Map<string, any>(data.map((e: any) => [e.slug, e]));
-  let cur = bySlug.get(slug);
-  if (!cur) return null;
-  while (cur.parent_id && byId.get(cur.parent_id)) cur = byId.get(cur.parent_id);
-  if (!cur || cur.slug === slug) return null; // l'entité est déjà la racine
-  return { slug: cur.slug, name: cur.display_name ?? cur.legal_name };
+  const idx = await loadEntityIndex();
+  if (!idx) return null;
+  const root = idx.rootOf(slug);
+  if (!root || root.slug === slug) return null; // l'entité est déjà la racine
+  return { slug: root.slug, name: entityName(root) };
+}
+
+// --- Alternatives mieux notées ------------------------------------------------
+
+/**
+ * Entités du même secteur et de même nature dont la note est strictement
+ * meilleure. L'I/O ici, les décisions dans `pickComparable` /
+ * `selectAlternatives` (testées).
+ *
+ * ⚠️ Coût : un appel `compute_score_input` par candidat du secteur (26 au plus
+ * aujourd'hui, secteur `food`). Tenable à l'échelle actuelle, intenable à celle
+ * du million de marques : il faudra alors matérialiser les scores en base et ne
+ * plus les recalculer à chaque affichage de fiche.
+ */
+export async function getAlternatives(
+  slug: string,
+  currentScore: number,
+  limit = 4,
+): Promise<Alternative[]> {
+  const idx = await loadEntityIndex();
+  if (!idx) return [];
+  const self = idx.bySlug.get(slug);
+  if (!self) return [];
+
+  const candidates = pickComparable(idx.rows, self);
+  if (candidates.length === 0) return [];
+
+  const scored = await mapWithConcurrency(candidates, 6, async (e) => {
+    try {
+      const payload = await getScorePayload(e.slug);
+      if (!payload) return null;
+      const r = computeScore(payload);
+      return {
+        slug: e.slug,
+        name: entityName(e),
+        grade: r.grade,
+        score: r.score,
+        confidence: r.confidence,
+        publishable: r.publishable,
+        root: idx.rootOf(e.slug)?.slug ?? null,
+      } as ScoredCandidate;
+    } catch {
+      return null;
+    }
+  });
+
+  const selfRoot = idx.rootOf(slug)?.slug ?? null;
+  return selectAlternatives(
+    scored.filter((x): x is ScoredCandidate => x !== null),
+    currentScore,
+    selfRoot,
+    limit,
+  );
 }

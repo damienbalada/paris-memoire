@@ -90,6 +90,35 @@ distinction nette entre publication automatique et validation humaine.
 Verrouillé par `pipeline/tests/test_review_model.py` : ces tests échouent si la
 liste des tiers auto-publiés s'élargit accidentellement (défaut sûr = `pending`).
 
+## Signalements des lecteurs — l'entrée par le bas ✅ implémenté
+
+Chaque fiche porte un formulaire de **signalement** (donnée manquante, fausse,
+lien mort). C'est le point d'entrée le moins coûteux de la contribution ouverte,
+et il est délibérément **désarmé** :
+
+| | Signalement | Evidence |
+|---|---|---|
+| Entre dans le score | **jamais** | oui, selon son tier |
+| Écrit par | n'importe quel lecteur | connecteur ou curation |
+| Effet immédiat | ouvre une revue | modifie la note |
+| Table | `corrections` | `evidence` |
+
+Un signalement jugé fondé (`/admin/corrections`) **ne publie rien** : il acte
+qu'une evidence sourcée doit être créée. C'est cette evidence, avec sa source et
+son tier, qui déplace la note. Un signalement sans source vérifiable se rejette.
+
+Conséquence voulue : **le volume ne fait pas la vérité.** Cent signalements
+concordants sans source ne valent pas un dépôt réglementaire. C'est la
+différence entre une boucle de contribution et un vote de popularité.
+
+Sécurité : la table `corrections` a la RLS activée et **aucune policy** — donc
+fermée aux clés `anon`/`authenticated`. L'écriture passe par une Server Action
+avec la `service_role`, côté serveur : la doctrine « aucune écriture depuis le
+navigateur » n'est pas relâchée. Le linter Supabase signale un `INFO`
+« RLS enabled, no policy » : c'est **l'état recherché**, pas un défaut. Un
+contrôle d'intégrité (`corrections_policy_inattendue`) échoue si une policy
+apparaît un jour.
+
 ## Ce que ce modèle garantit
 
 - **Scalabilité** : la revue humaine ne croît qu'avec le volume *presse/crowd*,
