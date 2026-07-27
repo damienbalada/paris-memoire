@@ -111,6 +111,28 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 @media (hover: hover) { .ent-row:hover { background: var(--panel-2); } }
 .ent-name { font-size: 14.5px; font-weight: 600; }
 .grade-none { background: var(--panel-3); color: var(--faint); }
+/* Résultat de recherche : nom + groupe propriétaire en sous-titre. */
+.ent-main { min-width: 0; }
+.ent-main .ent-name { display: block; }
+.ent-main small { display: block; font-size: 11.5px; margin-top: 2px; }
+
+/* Recherche : filtrage instantané côté client, aucune requête. */
+.search-box { position: relative; display: flex; align-items: center; }
+.search-box input {
+  width: 100%; box-sizing: border-box; font: inherit; font-size: 15px; color: var(--text);
+  background: var(--panel); border: 1px solid var(--border-strong); border-radius: 14px;
+  padding: 12px 40px 12px 40px; }
+.search-box input::placeholder { color: var(--faint); }
+.search-box input:focus { outline: 2px solid var(--accent); outline-offset: 1px;
+  border-color: var(--accent); }
+/* `appearance: none` retire la croix native de `type=search` (doublon du bouton). */
+.search-box input[type=search]::-webkit-search-cancel-button { appearance: none; }
+.search-icon { position: absolute; left: 15px; color: var(--faint); font-size: 18px;
+  pointer-events: none; line-height: 1; }
+.search-clear { position: absolute; right: 8px; width: 28px; height: 28px; border: 0;
+  border-radius: 50%; background: var(--panel-3); color: var(--muted); font-size: 17px;
+  line-height: 1; cursor: pointer; }
+@media (hover: hover) { .search-clear:hover { color: var(--text); } }
 
 /* Alternatives mieux notées : même grammaire que .ent-row, plus le delta. */
 .alt-list { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }

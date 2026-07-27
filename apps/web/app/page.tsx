@@ -1,4 +1,6 @@
 import { getAllScores, listEntities } from "@/lib/data";
+import { EntitySearch } from "@/components/EntitySearch";
+import type { SearchableEntity } from "@/lib/search";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,23 @@ export default async function HomePage() {
     String(name(a)).localeCompare(String(name(b)), "fr", { sensitivity: "base" });
   const groups = entities.filter((e) => !e.is_brand).sort(byName);
   const brands = entities.filter((e) => e.is_brand).sort(byName);
+
+  // Groupe propriétaire de chaque entité : sert à la recherche (« Unilever »
+  // doit remonter ses marques) et de sous-titre dans les résultats.
+  const byId = new Map(entities.map((e: any) => [e.id, e]));
+  const rootName = (e: any): string | null => {
+    let cur: any = e;
+    while (cur?.parent_id && byId.get(cur.parent_id)) cur = byId.get(cur.parent_id);
+    return cur && cur.slug !== e.slug ? String(name(cur)) : null;
+  };
+
+  const searchable: SearchableEntity[] = entities.map((e: any) => ({
+    slug: e.slug,
+    name: String(name(e)),
+    is_brand: e.is_brand,
+    group: rootName(e),
+    grade: grades.get(e.slug) ?? null,
+  }));
 
   // Une entité = une ligne. La note lettrée à gauche donne le repère visuel ;
   // « — » signale une entité pas encore notée (aucune preuve publiée).
@@ -59,19 +78,21 @@ export default async function HomePage() {
         </div>
       )}
 
-      {groups.length > 0 && (
-        <section>
-          <h2 className="list-title">Groupes <span className="muted">{groups.length}</span></h2>
-          <div className="ent-list">{groups.map(Row)}</div>
-        </section>
-      )}
+      <EntitySearch entities={searchable}>
+        {groups.length > 0 && (
+          <section>
+            <h2 className="list-title">Groupes <span className="muted">{groups.length}</span></h2>
+            <div className="ent-list">{groups.map(Row)}</div>
+          </section>
+        )}
 
-      {brands.length > 0 && (
-        <section>
-          <h2 className="list-title">Marques <span className="muted">{brands.length}</span></h2>
-          <div className="ent-list">{brands.map(Row)}</div>
-        </section>
-      )}
+        {brands.length > 0 && (
+          <section>
+            <h2 className="list-title">Marques <span className="muted">{brands.length}</span></h2>
+            <div className="ent-list">{brands.map(Row)}</div>
+          </section>
+        )}
+      </EntitySearch>
     </main>
   );
 }

@@ -130,7 +130,13 @@ qui ne sont pas de l'interface mais de la **donnée** (donc à traiter par langu
 de source, pas par simple traduction).
 
 - **Internationalisation** (i18n) : extraction des libellés, FR + EN d'abord.
-- **Recherche** d'une marque par nom / code-barres (scan en magasin).
+- **Recherche** — ✅ par nom, slug et **groupe propriétaire** (« Unilever »
+  remonte ses marques). Filtrage client sur la liste complète : instantané à
+  ~200 entités, à remplacer par une recherche plein texte en base (index
+  trigramme) au-delà de quelques milliers. Reste à faire : le **code-barres**
+  (scan en magasin), qui suppose l'univers Open Food Facts (Axe C1).
+  L'état « aucun résultat » dit explicitement que l'absence d'une marque n'est
+  pas un jugement, et ouvre un signalement (Règle 7).
 - **API publique** ouverte (la traçabilité est un argument de confiance).
 - **Accessibilité** (a11y) et mobile-first (déjà entamé).
 - Neutralité éditoriale : aucune monétisation qui compromette l'indépendance.

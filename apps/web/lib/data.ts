@@ -83,7 +83,7 @@ export async function listEntities() {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("entities")
-    .select("slug, display_name, legal_name, is_brand, parent_id, sector_id")
+    .select("id, slug, display_name, legal_name, is_brand, parent_id, sector_id")
     .order("is_brand")
     .order("display_name");
   if (error) throw new Error(error.message);
