@@ -1,4 +1,4 @@
-from paris_memoire.connectors.egapro import (
+﻿from paris_memoire.connectors.egapro import (
     EgaproRecord,
     latest_by_siren,
     parse_csv,
@@ -10,8 +10,8 @@ PAYLOAD = {
     "results": [
         {"siren": "552075020", "raison_sociale": "KERING", "annee": "2023", "note_index": 91},
         {"siren": "552075020", "raison_sociale": "KERING", "annee": "2024", "note_index": 94},
-        {"siren": "999999999", "raison_sociale": "SANS NOTE", "annee": "2024"},  # note manquante
-        {"siren": "", "annee": "2024", "note_index": 80},                          # siren manquant
+        {"siren": "999999999", "raison_sociale": "SANS NOTE", "annee": "2024"},
+        {"siren": "", "annee": "2024", "note_index": 80},
     ]
 }
 
@@ -33,8 +33,8 @@ def test_build_rows_normalizes_over_100():
     by_siren = {"552075020": EgaproRecord(siren="552075020", raison_sociale="KERING", year="2024", note=94)}
     entities = [
         {"slug": "kering", "siren": "552075020"},
-        {"slug": "hermes", "siren": "572012051"},   # pas dans les résultats
-        {"slug": "chanel", "siren": None},          # pas de siren
+        {"slug": "hermes", "siren": "572012051"},
+        {"slug": "chanel", "siren": None},
     ]
     rows = build_rows(entities, by_siren)
     assert len(rows) == 1
@@ -49,12 +49,28 @@ def test_parse_csv_offline_fallback(tmp_path):
     p.write_text(
         "siren,raison_sociale,annee,note\n"
         "552075020,KERING,2024,94\n"
-        "000000000,SANS NOTE,2024,\n"     # note vide -> sautée
-        ",VIDE,2024,50\n",               # siren vide -> sautée
+        "000000000,SANS NOTE,2024,\n"
+        ",VIDE,2024,50\n",
         encoding="utf-8",
     )
     recs = parse_csv(str(p))
     assert [r.siren for r in recs] == ["552075020"]
+    assert recs[0].note == 94.0
+    assert recs[0].year == "2024"
+
+
+def test_parse_csv_official_export_headers(tmp_path):
+    # En-tetes reels de l'export data.gouv.fr : "Note Index" (espace), "Annee",
+    # "Raison Sociale" - casse et libelles du fichier officiel.
+    p = tmp_path / "egapro.csv"
+    p.write_text(
+        "Annee,SIREN,Raison Sociale,Note Ecart remuneration,Note Index\n"
+        "2024,552075020,KERING,38,94\n",
+        encoding="utf-8-sig",
+    )
+    recs = parse_csv(str(p))
+    assert len(recs) == 1
+    assert recs[0].siren == "552075020"
     assert recs[0].note == 94.0
     assert recs[0].year == "2024"
 
