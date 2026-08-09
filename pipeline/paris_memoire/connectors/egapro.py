@@ -1,4 +1,4 @@
-"""Connecteur Égapro — index d'égalité professionnelle F/H (France).
+﻿"""Connecteur Égapro — index d'égalité professionnelle F/H (France).
 
 Open data : https://data.economie.gouv.fr — dataset
 « index-egalite-professionnelle-f-h » (API Opendatasoft explore v2, sans clé).
@@ -57,7 +57,7 @@ def parse_records(payload: dict[str, Any]) -> list[EgaproRecord]:
 
 
 SIREN_COLS = ("siren",)
-NOTE_COLS = ("note_index", "note", "index")
+NOTE_COLS = ("note index", "note_index", "note", "index")
 YEAR_COLS = ("annee", "année", "year")
 NAME_COLS = ("raison_sociale", "raison sociale", "entreprise", "nom")
 
